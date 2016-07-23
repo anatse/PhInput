@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.util.{Base64, Date}
 
 import com.orientechnologies.orient.core.metadata.schema.OType
+import com.tinkerpop.blueprints.{Parameter, Vertex}
 import org.asem.orient._
 import spray.json.{JsObject, JsString, _}
 
@@ -41,18 +42,6 @@ case class PhUser(login: String, private val password: Option[String] = None, at
   def hasPermission(permission: String) = {
     true;
   }
-
-  def createVertexType(): Unit = {
-    Database.getTx(
-      graph => {
-        val vtx = graph.createVertexType("PhUser")
-        vtx.createProperty("login", OType.STRING)
-        vtx.createProperty("password", OType.STRING)
-        vtx.createProperty("firstName", OType.STRING)
-
-      }
-    )
-  }
 }
 
 /**
@@ -61,6 +50,19 @@ case class PhUser(login: String, private val password: Option[String] = None, at
   * @see https://github.com/spray/spray-json
   */
 object PhUser extends DefaultJsonProtocol {
+  def createVertexType(): Unit = {
+    Database.getTx(
+      graph => {
+        val vtx = graph.createVertexType("PharmUser")
+        vtx.createProperty("login", OType.STRING).setMandatory(true).setNotNull(true)
+        vtx.createProperty("password", OType.STRING).setMandatory(true).setNotNull(true)
+        vtx.createProperty("firstName", OType.STRING).setMandatory(true).setNotNull(true)
+        vtx.createProperty("secondName", OType.STRING).setMandatory(true).setNotNull(true)
+        graph.createKeyIndex("login", classOf[Vertex], new Parameter("type", "UNIQUE"), new Parameter("class", "PharmUser"));
+      }
+    )
+  }
+
   implicit object PhUserJsonFormat extends RootJsonFormat[PhUser] {
     override def write(obj: PhUser): JsValue = {
       if (obj.attributes != null) {
@@ -79,7 +81,7 @@ object PhUser extends DefaultJsonProtocol {
             case others  => JsString("not found converter for: " + others.getClass.getName)
           }
 
-          (attr._1 -> value)
+          attr._1 -> value
         }
 
         JsObject (
