@@ -15,7 +15,7 @@ trait Authenticator {
     def validateUser(userPass: Option[UserPass]): Option[PhUser] = {
       var user:PhUser = null
       if (userPass.isDefined) {
-        user = Await.result(Database.findUser(PhUser(userPass.get.user, Some(userPass.get.pass))), 1 seconds)
+        user = Await.result(Database.findUser(PhUser(userPass.get.user, Some(userPass.get.pass))), 10 minutes)
         if (user != null)
           println (user.login)
         else
