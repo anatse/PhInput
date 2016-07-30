@@ -1,0 +1,47 @@
+connect remote:localhost/probe root 123456;
+
+/** Users */
+CREATE CLASS PhUser EXTENDS V;
+CREATE PROPERTY PhUser.login STRING;
+CREATE PROPERTY PhUser.password STRING;
+ALTER PROPERTY PhUser.login MANDATORY TRUE;
+ALTER PROPERTY PhUser.password MANDATORY TRUE;
+CREATE INDEX UxPhUserLogin ON PhUser(login) UNIQUE STRING;
+
+/** Projects  */
+CREATE CLASS Project EXTENDS V;
+CREATE PROPERTY Project.name STRING;
+CREATE PROPERTY Project.startDate DATE;
+ALTER PROPERTY Project.name MANDATORY TRUE;
+ALTER PROPERTY Project.startDate MANDATORY TRUE;
+CREATE INDEX UxProjectName ON Project(name) UNIQUE STRING;
+
+/** Define edges between users and projects  */
+CREATE CLASS Worker EXTENDS E;
+CREATE PROPERTY Worker.out LINK PhUser;
+CREATE PROPERTY Worker.in LINK Project;
+ALTER PROPERTY Worker.out MANDATORY TRUE;
+ALTER PROPERTY Worker.in MANDATORY TRUE;
+
+/** Unique index to avoid duplicate relations between users and projects */
+CREATE INDEX UxWorker ON Worker(out,in) UNIQUE;
+
+/** User relations to projects with roles  */
+CREATE CLASS Manager EXTENDS Worker;
+CREATE CLASS Employee EXTENDS Worker;
+CREATE CLASS Owner EXTENDS Worker;
+
+CREATE CLASS PharmNet EXTENDS V;
+CREATE PROPERTY PharmNet.name STRING;
+ALTER PROPERTY PharmNet.name MANDATORY TRUE;
+CREATE INDEX UxPharmNet ON PharmNet(name) UNIQUE;
+
+CREATE CLASS Pharmacy EXTENDS V;
+CREATE PROPERTY Pharmacy.name STRING;
+CREATE PROPERTY Pharmacy.address STRING;
+# CREATE PROPERTY Pharmacy.net LINK PharmNet;
+
+ALTER PROPERTY Pharmacy.name MANDATORY TRUE;
+ALTER PROPERTY Pharmacy.address MANDATORY TRUE;
+
+CREATE INDEX UxPharmacy ON Pharmacy(name, address) UNIQUE;

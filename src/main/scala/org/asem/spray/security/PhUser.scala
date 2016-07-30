@@ -101,7 +101,7 @@ object PhUser extends DefaultJsonProtocol {
         case Seq(JsString(login), JsString(password)) => {
           val map = for {
             field <- jso.fields
-            if (field._1 != "login" && field._2 != "password")
+            if (field._1 != JsString("login") && field._2 != JsString("password"))
           } yield {
             (field._1 -> {
               field._2 match {

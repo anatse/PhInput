@@ -30,15 +30,6 @@ trait AuthServices extends HttpService with Authenticator {
           }
         }
       }
-    } ~ path ("users_" / "type") {
-      post {
-        respondWithStatus(201) {
-          complete {
-            PhUser.createVertexType()
-            "OK"
-          }
-        }
-      }
     }
   }
 
