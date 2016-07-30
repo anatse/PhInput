@@ -6,7 +6,7 @@ import java.util.Base64
 import javax.crypto.Cipher
 
 import com.typesafe.config.ConfigFactory
-import spray.caching.ExpiringLruCache
+import spray.caching._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -36,7 +36,7 @@ object RSA {
     keyStore.getEntry(alias, keyPwd).asInstanceOf[KeyStore.PrivateKeyEntry];
   };
 
-  private val cacheKeys:ExpiringLruCache[String] = new ExpiringLruCache[String](10000, 0, 30 minutes, 10 minutes)
+  private val cacheKeys:Cache[String] = new ExpiringLruCache[String](10000, 0, 30 minutes, 10 minutes)
 
   def isInitialized:Boolean = {
     pkEntry.getPrivateKey() != null
@@ -52,6 +52,7 @@ object RSA {
   def decrypt(data:String): Future[String] = cacheKeys(data) {
     val cipher = Cipher.getInstance("RSA")
     cipher.init(Cipher.DECRYPT_MODE, pkEntry.getPrivateKey);
-    new String(cipher.doFinal(Base64.getDecoder.decode(data)));
+    val ret = new String(cipher.doFinal(Base64.getDecoder.decode(data)));
+    ret
   }
 }

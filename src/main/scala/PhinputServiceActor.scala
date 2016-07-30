@@ -1,22 +1,13 @@
 import akka.actor.Actor
 import com.typesafe.config.ConfigFactory
-import org.asem.spray.security._
-import spray.http.MediaTypes._
-import spray.http._
-import spray.httpx.SprayJsonSupport._
-import spray.json._
-import spray.routing._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import spray.routing.authentication._
-import spray.routing.directives.CachingDirectives._
-import HttpHeaders._
-import CacheDirectives._
 import org.asem.orient.model.CookieAuthenticator._
 import org.asem.orient.model.PhUser
-import spray.routing.directives.AuthMagnet
-
-import scala.concurrent.Future
+import org.asem.spray.security._
+import spray.http._
+import spray.routing._
+import spray.routing.authentication._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Created by gosha-user on 17.07.2016.
@@ -45,8 +36,8 @@ trait MyService extends HttpService with Authenticator {
     sealRoute {
       path("secured") {
         authenticate (byCookie) {
-          user => setCookie(HttpCookie("user_token", content = user.token)){
-            complete("The user was logged in " + user.login)
+          user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
+            complete("The user was logged in " + user.token)
           }
 //          user => get {
 //            complete {

@@ -75,7 +75,7 @@ class CookieAuthenticator {
       val userData = Await.result(RSA.decrypt(userToken.get.content), 10.minutes)
       val pu = PhUser.unapply(userData)
       if (pu.isDefined) {
-        ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString)))
+        ret = Some(UserData(pu.get.login, userToken.get.content))
       }
     }
 
