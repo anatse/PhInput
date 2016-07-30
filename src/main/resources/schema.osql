@@ -1,14 +1,36 @@
-connect remote:localhost/probe root 123456;
+connect remote:localhost/pharma root 123456;
 
-/** Users */
+DROP CLASS PhUser;
+DROP CLASS Project;
+DROP CLASS VisitReq;
+DROP CLASS PrjCycle;
+DROP CLASS PharmNet;
+DROP CLASS CodeWithName;
+DROP CLASS Address;
+DROP CLASS Pharmacy;
+DROP CLASS Worker;
+DROP CLASS Manager;
+DROP CLASS Employee;
+
 CREATE CLASS PhUser EXTENDS V;
 CREATE PROPERTY PhUser.login STRING;
 CREATE PROPERTY PhUser.password STRING;
+CREATE PROPERTY PhUser.email STRING;
+CREATE PROPERTY PhUser.firstName STRING;
+CREATE PROPERTY PhUser.secondName STRING;
+CREATE PROPERTY PhUser.activated boolean;
+
+alter property PhUser.login COLLATE ci;
+alter property PhUser.email COLLATE ci;
 ALTER PROPERTY PhUser.login MANDATORY TRUE;
 ALTER PROPERTY PhUser.password MANDATORY TRUE;
-CREATE INDEX UxPhUserLogin ON PhUser(login) UNIQUE STRING;
+ALTER PROPERTY PhUser.email MANDATORY TRUE;
+ALTER PROPERTY PhUser.activated MANDATORY TRUE;
+ALTER PROPERTY PhUser.activated DEFAULT 0;
 
-/** Projects  */
+CREATE INDEX UxPhUserLogin ON PhUser(login) UNIQUE STRING;
+CREATE INDEX UxPhUserEmail ON PhUser(email) UNIQUE STRING;
+
 CREATE CLASS Project EXTENDS V;
 CREATE PROPERTY Project.name STRING;
 CREATE PROPERTY Project.startDate DATE;
@@ -16,32 +38,60 @@ ALTER PROPERTY Project.name MANDATORY TRUE;
 ALTER PROPERTY Project.startDate MANDATORY TRUE;
 CREATE INDEX UxProjectName ON Project(name) UNIQUE STRING;
 
-/** Define edges between users and projects  */
-CREATE CLASS Worker EXTENDS E;
-CREATE PROPERTY Worker.out LINK PhUser;
-CREATE PROPERTY Worker.in LINK Project;
-ALTER PROPERTY Worker.out MANDATORY TRUE;
-ALTER PROPERTY Worker.in MANDATORY TRUE;
+create class VisitReq;
+create property VisitReq.num short;
+create property VisitReq.type string ;
+ALTER PROPERTY VisitReq.type regexp "[PH|DR]";
+ALTER PROPERTY VisitReq.num MANDATORY TRUE;
+ALTER PROPERTY VisitReq.type MANDATORY TRUE;
 
-/** Unique index to avoid duplicate relations between users and projects */
-CREATE INDEX UxWorker ON Worker(out,in) UNIQUE;
-
-/** User relations to projects with roles  */
-CREATE CLASS Manager EXTENDS Worker;
-CREATE CLASS Employee EXTENDS Worker;
-CREATE CLASS Owner EXTENDS Worker;
+create class PrjCycle extends v;
+create property PrjCycle.name string;
+create property PrjCycle.startDate date;
+create property PrjCycle.endDate date;
+create property PrjCycle.visits embeddedlist VisitReq;
+ALTER PROPERTY PrjCycle.name MANDATORY TRUE;
+ALTER PROPERTY PrjCycle.startDate MANDATORY TRUE;
+ALTER PROPERTY PrjCycle.endDate MANDATORY TRUE;
+ALTER PROPERTY PrjCycle.visits MANDATORY TRUE;
 
 CREATE CLASS PharmNet EXTENDS V;
 CREATE PROPERTY PharmNet.name STRING;
 ALTER PROPERTY PharmNet.name MANDATORY TRUE;
 CREATE INDEX UxPharmNet ON PharmNet(name) UNIQUE;
 
+create class CodeWithName;
+create property CodeWithName.code string;
+create property CodeWithName.name string;
+alter property CodeWithName.code mandatory true;
+alter property CodeWithName.name mandatory true;
+
+create class Address;
+create property Address.city embedded CodeWithName;
+create property Address.street embedded CodeWithName;
+create property Address.building embedded CodeWithName;
+alter property Address.city mandatory true;
+alter property Address.street mandatory true;
+alter property Address.building mandatory true;
+
 CREATE CLASS Pharmacy EXTENDS V;
 CREATE PROPERTY Pharmacy.name STRING;
-CREATE PROPERTY Pharmacy.address STRING;
-# CREATE PROPERTY Pharmacy.net LINK PharmNet;
+CREATE PROPERTY Pharmacy.address embedded Address;
+CREATE PROPERTY Pharmacy.chiefPhone STRING;
 
 ALTER PROPERTY Pharmacy.name MANDATORY TRUE;
 ALTER PROPERTY Pharmacy.address MANDATORY TRUE;
 
 CREATE INDEX UxPharmacy ON Pharmacy(name, address) UNIQUE;
+
+CREATE CLASS Worker EXTENDS E;
+CREATE PROPERTY Worker.out LINK PhUser;
+CREATE PROPERTY Worker.in LINK Project;
+ALTER PROPERTY Worker.out MANDATORY TRUE;
+ALTER PROPERTY Worker.in MANDATORY TRUE;
+
+CREATE INDEX UxWorker ON Worker(out,in) UNIQUE;
+
+CREATE CLASS Manager EXTENDS Worker;
+CREATE CLASS Employee EXTENDS Worker;
+CREATE CLASS Owner EXTENDS Worker;

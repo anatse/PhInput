@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 /**
   * Created by gosha-user on 17.07.2016.
   */
-case class PhUser(login: String, private val password: Option[String] = None, attributes:Map[String, Any] = Map()) {
+case class PhUserOld(login: String, private val password: Option[String] = None, attributes:Map[String, Any] = Map()) {
   val pwdHash = computeHash(password.getOrElse(""))
 
   override def toString = "PhUser(login: " + login + ")"
@@ -49,7 +49,7 @@ case class PhUser(login: String, private val password: Option[String] = None, at
   *
   * @see https://github.com/spray/spray-json
   */
-object PhUser extends DefaultJsonProtocol {
+object PhUserOld extends DefaultJsonProtocol {
   def createVertexType(): Unit = {
     Database.getTx(
       graph => {
@@ -63,8 +63,8 @@ object PhUser extends DefaultJsonProtocol {
     )
   }
 
-  implicit object PhUserJsonFormat extends RootJsonFormat[PhUser] {
-    override def write(obj: PhUser): JsValue = {
+  implicit object PhUserJsonFormat extends RootJsonFormat[PhUserOld] {
+    override def write(obj: PhUserOld): JsValue = {
       if (obj.attributes != null) {
         val sequence = for {
           attr <- (obj.attributes + ("login" -> obj.login))
@@ -95,7 +95,7 @@ object PhUser extends DefaultJsonProtocol {
       }
     }
 
-    override def read(json: JsValue): PhUser = {
+    override def read(json: JsValue): PhUserOld = {
       val jso = json.asJsObject
       jso.getFields("login", "password") match {
         case Seq(JsString(login), JsString(password)) => {
@@ -112,7 +112,7 @@ object PhUser extends DefaultJsonProtocol {
             })
           }
 
-          new PhUser(login, Some(password), map)
+          new PhUserOld(login, Some(password), map)
         }
         case _ => throw new DeserializationException("User expected")
       }

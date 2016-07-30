@@ -9,8 +9,10 @@ import java.security.KeyStore
 import java.security.SecureRandom
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
-
 import javax.net.ssl.TrustManagerFactory
+
+import org.asem.spray.security.RSA
+
 import scala.concurrent.duration._
 import spray.io.ServerSSLEngineProvider
 
@@ -27,12 +29,10 @@ object Boot extends App {
 
   implicit val mySSLContext: SSLContext = {
     val context = SSLContext.getInstance("TLS")
-    val password = "123456"
-    
-    val keyStore:KeyStore = KeyStore.getInstance("jks");
-    keyStore.load(new FileInputStream ("C:/Projects/phinp-mv/src/keys/KeyStore.jks"), password.toCharArray());
+
+    val keyStore:KeyStore = RSA.keyStore
     val keyManagerFactory:KeyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-    keyManagerFactory.init(keyStore, password.toCharArray());
+    keyManagerFactory.init(keyStore, RSA.getPassword.getPassword);
 
     val trustManagerFactory:TrustManagerFactory = TrustManagerFactory.getInstance("SunX509");
     trustManagerFactory.init(keyStore);

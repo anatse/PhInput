@@ -20,7 +20,7 @@ trait AuthServices extends HttpService with Authenticator {
           }
         }
       } ~ post {
-        entity(as[PhUser]) {
+        entity(as[PhUserOld]) {
           user => {
             respondWithMediaType(`application/json`) {
               complete {
@@ -32,5 +32,4 @@ trait AuthServices extends HttpService with Authenticator {
       }
     }
   }
-
 }
