@@ -6,7 +6,6 @@ import org.asem.spray.security.RSA
 import org.scalatest._
 
 import scala.concurrent.Await
-import scala.xml._
 import scala.concurrent.duration._
 
 class XMLTest extends FlatSpec with Matchers {
@@ -29,14 +28,14 @@ class XMLTest extends FlatSpec with Matchers {
       }}
     </data>
 
-    val printer = new PrettyPrinter(80, 2)
-    println(printer.format(xml))
+//    val printer = new PrettyPrinter(80, 2)
+//    println(printer.format(xml))
   }
 
   it should "read from database and store to XML" in {
     val xml = Database.queryToXml("SELECT * FROM PhUser", Map())
     val printer = new scala.xml.PrettyPrinter(80, 2)
-    println(printer.format(xml))
+//    println(printer.format(xml))
   }
 
   "RSA" should "load keystore from file" in {
@@ -47,13 +46,13 @@ class XMLTest extends FlatSpec with Matchers {
   it should "encrypt data using public key" in {
     encryptedData = RSA.encrypt("test data")
     encryptedData shouldNot be ("")
-    println (encryptedData)
+//    println (encryptedData)
   }
 
   it should "decrypt data using private key" in {
     val decryptedData = Await.result (RSA.decrypt(encryptedData), 1 minutes)
     decryptedData should be ("test data")
-    println (decryptedData)
+//    println (decryptedData)
   }
 
   val user = PhUser("demo", "demo", "demo@demo.org", "firstname", "secondName")
@@ -62,7 +61,7 @@ class XMLTest extends FlatSpec with Matchers {
   }
 
   it should "be unapplied from string" in {
-    val restoredUser = PhUser.unapply(user.toString).getOrElse(null)
+    val restoredUser = PhUser.fromString(user.toString).getOrElse(null)
     restoredUser.toString should be (user.toString)
     restoredUser.pwdHash should be ("")
   }

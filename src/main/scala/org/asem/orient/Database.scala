@@ -2,11 +2,7 @@ package org.asem.orient
 
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientGraphFactory}
 import com.typesafe.config.ConfigFactory
-import org.asem.spray.security.PhUserOld
-import spray.caching.{Cache, LruCache}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.collection.JavaConversions._
 
 /**
@@ -18,8 +14,6 @@ object Database {
   lazy val pool = {
     new OrientGraphFactory (config.getString("database.url"), config.getString("database.user"), config.getString("database.password")).setupPool(1, 10)
   }
-
-  val userCache:Cache[PhUserOld] = LruCache()
 
   def queryToXml (query: String, params:Map[String, Any]) = {
     val result = Query.executeQuery(query, params)
@@ -40,7 +34,7 @@ object Database {
     </data>
   }
   
-  def getTx (performs: OrientGraph => Any):Any = {
+  def getTx[T] (performs: OrientGraph => T):T = {
     val g = pool.getTx
     try {
       performs (g)
@@ -48,13 +42,6 @@ object Database {
     finally {
       g.shutdown()
     }
-  }
-
-  def findUser(usr: PhUserOld): Future[PhUserOld] = userCache(usr) {
-    if (usr.checkUserExists())
-      usr
-    else
-      null
   }
 }
 

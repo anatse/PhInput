@@ -3,22 +3,46 @@ package org.asem.orient.services
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
 
 /**
-  * Created by gosha-user on 30.07.2016.
-  */
+ * Created by gosha-user on 30.07.2016.
+ */
 trait BaseDB {
-  def add (clazz:String, func:OrientVertex => BaseDB):OrientGraph => OrientVertex = {
+  def addVertex(clazz: String, params: Map[String, Any]): OrientGraph => OrientVertex = {
     tx => {
-      val vtx = tx.addVertex("class:" + clazz, java.util.Collections.EMPTY_MAP)
-      func(vtx)
-      vtx.save()
+      var vtx = tx.addVertex("class:" + clazz, java.util.Collections.EMPTY_MAP)
+      params.foreach((e: (String, Any)) => {
+        if (e._2 != null)
+          vtx.setProperty(e._1, e._2)
+      })
+
+      try {
+        vtx.save()
+      } 
+      catch {
+        case ex: Exception => {
+            vtx = null
+        }
+      }
+
       vtx
     }
   }
 
-  def ++ (propName:String, propValue:Any):OrientVertex => BaseDB = {
-    vtx => {
-      vtx.setProperty(propName, propValue)
-      this
+  def findVertexByAttr(tx: OrientGraph, clazz: String, attrName: String, attr: Object): Option[OrientVertex] = {
+    val vtxs = tx.getVertices(clazz, Array(attrName), Array(attr))
+    println("attrName: " + attrName + " = " + attr + ": " + vtxs.iterator())
+
+    if (vtxs.iterator.hasNext)
+      Some(vtxs.iterator.next.asInstanceOf[OrientVertex])
+    else
+      None
+  }
+
+  def deleteVertex(tx: OrientGraph, vtx: OrientVertex): Boolean = {
+    try {
+      tx.removeVertex(vtx)
+      true
+    } catch {
+      case e: Exception => false
     }
   }
 }

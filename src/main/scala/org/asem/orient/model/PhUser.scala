@@ -1,18 +1,21 @@
 package org.asem.orient.model
 
 import java.security._
-import java.util.{Base64, Date}
+import java.util._
 
-import org.asem.orient.Database
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json._
 
 /**
   * Class represents user for pharmacy input system
   * Created by gosha-user on 30.07.2016.
   */
-case class PhUser(login: String, private val password: String, email: String = "", firstName: String = "", secondName: String = "", activated: Boolean = false) {
-  lazy val pwdHash = computeHash(password)
+case class PhUser(login: String, password: String, email: String = "", firstName: String = "", secondName: String = "", activated: Boolean = false) {
+  require(login != null, "login should be provided")
+  require(password != null, "password should be provided")
+  require(email != null, "email should be provided")
 
+  lazy val pwdHash = computeHash(password)
+  
   override def toString = login + "," + email + "," + firstName + "," + secondName
 
   def computeHash(pwd: String): String = {
@@ -24,36 +27,46 @@ case class PhUser(login: String, private val password: String, email: String = "
       Base64.getEncoder.encodeToString(dig)
     }
   }
+  
+  def unapply(user:PhUser) = Some (user.login, user.pwdHash, user.email, user.firstName, user.secondName, user.activated)
 }
 
 /**
   * Object used to deserialize PhUser from string, using scala regexp unapply function
   */
 object PhUser extends DefaultJsonProtocol {
-  val PhUserRegex = "(.*),(.*),(.*),(.*)".r
+  private val PhUserRegex = "(.*),(.*),(.*),(.*)".r
 
-  def unapply(str: String): Option[PhUser] = str match {
+  def fromString(str: String): Option[PhUser] = str match {
     case PhUserRegex(login, email, firstName, secondName) => Some(PhUser(login, "", email, firstName, secondName, true))
     case _ => None
   }
-
-  def createUser(user: PhUser): PhUser = {
-    Database.getTx(
-      graph => {
-        val vtx = graph.addVertex("class:PhUser", java.util.Collections.EMPTY_MAP)
-        vtx.setProperty("login", user.login)
-        vtx.setProperty("password", user.pwdHash)
-        vtx.setProperty("email", user.email)
-        vtx.setProperty("firstName", user.firstName)
-        vtx.setProperty("secondName", user.secondName)
-        vtx.setProperty("activated", if (user.activated) 1 else 0)
-        vtx.save()
+  
+  implicit def js2string(x: Option[JsValue]):String = {
+    if (x.isDefined) {
+      x.get match {
+        case JsString(s) => s
+        case _ => null
       }
-    )
-
-    user
+    }
+    else 
+      null
   }
 
+  def unapply(obj: JsObject): Option[PhUser] = {
+    val fields = obj.fields
+    Some (
+      PhUser (
+        fields.get("login"),
+        fields.get("password"),
+        fields.get("email"),
+        fields.get("firstName"),
+        fields.get("secondName"),
+        fields.getOrElse("activated", JsBoolean(false)).asInstanceOf[JsBoolean].value
+      )
+    )
+  }
+  
   implicit object PhUserJsonFormat extends RootJsonFormat[PhUser] {
     override def write(obj: PhUser): JsValue = {
       JsObject(
@@ -62,14 +75,10 @@ object PhUser extends DefaultJsonProtocol {
     }
 
     override def read(json: JsValue): PhUser = {
-      val jso = json.asJsObject
-      jso.getFields("login", "password") match {
-        case Seq(JsString(login), JsString(password)) => new PhUser(login, password)
-        case _ => throw new DeserializationException("User expected")
-      }
+      val PhUser(user) = json.asJsObject
+      user
     }
   }
-
 }
 
 

@@ -8,9 +8,9 @@ import javax.crypto.Cipher
 import com.typesafe.config.ConfigFactory
 import spray.caching._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by gosha-user on 30.07.2016.

@@ -3,14 +3,16 @@ package org.asem.orient.model
 import com.typesafe.config.ConfigFactory
 import org.asem.orient.Query
 import org.asem.spray.security.RSA
+import spray.http.{HttpCookie, HttpForm, HttpHeader, HttpResponse}
+import spray.httpx.unmarshalling._
 import spray.routing.AuthenticationFailedRejection.CredentialsMissing
-import spray.routing.{AuthenticationFailedRejection, RequestContext}
 import spray.routing.authentication._
+import spray.routing.{AuthenticationFailedRejection, RequestContext, StandardRoute}
 
-import scala.concurrent.{Await, Future}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 case class UserData (login:String, token:String)
 
@@ -26,15 +28,10 @@ class CookieAuthenticator {
       "password" -> pwdHash
     )
 
-    println ("user to find: " + params)
-
     // .toLowerCase()
     val result = Query.executeQuery("SELECT * FROM PhUser WHERE login = :login and password = :password", params)
-    println ("result: " + result.size())
     if (result.size() == 1) {
       val row = result.get(0)
-      println ("user found")
-
       Some(PhUser(row.getProperty("login"), "",
         row.getProperty("email"),
         row.getProperty("firstName"),
@@ -56,24 +53,25 @@ class CookieAuthenticator {
     var ret: Option[UserData] = None
 
     if (!userToken.isDefined) {
-//      ctx.request.headers.toMap
-      val queryParams = ctx.request.uri.query.toMap
+      val formd = ctx.request.as[HttpForm]
+      if (formd.isRight) {
+        val user:PhUser = formd.right.get.fields match {
+          case Seq((name, nameval:String), (pass, passval:String)) => PhUser (nameval, passval)
+          case _ => null
+        }
 
-      val user: Option[PhUser] = for {
-        id <- queryParams.get("uname")
-        secret <- queryParams.get("upass")
-      } yield PhUser(id, secret)
-
-      if (user.isDefined) {
-        val pu = loadUser(user.get.login, user.get.pwdHash)
-        if (pu.isDefined) {
-          ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString)))
+        if (user != null) {
+          val pu = loadUser(user.login, user.pwdHash)
+          if (pu.isDefined) {
+            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString)))
+          }
         }
       }
     }
     else {
       val userData = Await.result(RSA.decrypt(userToken.get.content), 10.minutes)
-      val pu = PhUser.unapply(userData)
+      val pu = PhUser.fromString (userData)
+
       if (pu.isDefined) {
         ret = Some(UserData(pu.get.login, userToken.get.content))
       }
@@ -82,14 +80,25 @@ class CookieAuthenticator {
     ret
   }
 
+  /**
+   * Value (function) used to check & retrieve current credentials
+   */
   val byCookie: ContextAuthenticator[UserData] = {
     ctx => Future {
       extractCredentials(ctx) match {
         case Some(user) => Right(user)
         case _ => Left(AuthenticationFailedRejection(CredentialsMissing, List()))
-      }
+      } 
     }
   }
+
+//  def setCookie1 (user: UserData): RequestContext => RequestContext = {
+//    import spray.http.HttpHeaders._
+//    ctx => {
+//      val h = List(`Set-Cookie`(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))))
+//      ctx.withHttpResponseHeadersMapped (h ::: _)
+//    }
+//  }
 }
 
 object CookieAuthenticator extends CookieAuthenticator
