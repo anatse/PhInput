@@ -5,7 +5,7 @@ import java.util.Date
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import spray.json.{JsString, JsField, _}
+import spray.json.{JsString, _}
 
 /**
   * Class represents report data used to store and retrieve information about whole visit into pharmacy
@@ -77,7 +77,7 @@ object Report extends DefaultJsonProtocol {
         managerName = vtx.getProperty[String]("managerName"),
         managerPhone = vtx.getProperty[String]("managerPhone"),
         tradeRoomPhone = vtx.getProperty[String]("tradeRoomPhone"),
-        id = vtx.getId.toString
+        id = vtx.getId.toString.replace("#", "")
       )
     )
   }

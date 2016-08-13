@@ -7,7 +7,8 @@ Ext.define('PH.view.Viewport', {
         'PH.view.Navigation',
         'PH.view.ContentPanel',
         'PH.view.user.List',
-        'Ext.tree.*'
+        'Ext.tree.*',
+        'PH.view.report.List',
     ],
     layout: 'border',
     items: [{

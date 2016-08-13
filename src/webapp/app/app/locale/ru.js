@@ -12,7 +12,8 @@ Ext.define('PH.locale.ru', {
     titles: {
         navi: 'Функции системы',
         users: 'Пользователи системы',
-        userEdit: 'Редактирование пользователя'
+        userEdit: 'Редактирование пользователя',
+        reports: 'Отчеты'
     },
     fields: {
         login: 'Пользователь',
@@ -20,13 +21,24 @@ Ext.define('PH.locale.ru', {
         secondName: 'Фамилия',
         manager: 'Менеджер',
         activated: 'Активный',
-        email: 'Почта'
+        email: 'Почта',
+        city: 'Город',
+        sreet: 'Улица',
+        building: 'Дом',
+        pharmNet: 'Сеть',
+        pharmacy: 'Атека',
+        agreements: 'Договоренность',
+        managerName: 'Заведующий',
+        managerPhone: 'Тел. завед.',
+        tradeRoomPhone: 'Торг.зал.тел'
     },
     button: {
-        save: 'Save',
-        cancel: 'Cancel',
-        delete: 'Delete',
-        close: 'Close'
+        save: 'Сохранить',
+        cancel: 'Отмена',
+        delete: 'Удалить',
+        close: 'Закрыть',
+        refresh: 'Обновить',
+        add: 'Добавить'
     },
     messages: {
         wait: 'Пожалуйста подождите...'

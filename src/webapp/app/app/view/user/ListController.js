@@ -1,34 +1,89 @@
 
 Ext.define("PH.view.user.ListController", {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.list',
-    
+    alias: 'controller.userList',
+
+    // refs: [{
+    //     ref: 'users',
+    //     selector: 'usersView'
+    // }],
+
     control: {
         '#': {
             itemdblclick: 'editUser'
         },
-        button: {
-            click: 'syncUser'
+        'button[action=add]': {
+            click: 'createUser'
+        },
+        'button[action=refresh]': {
+            click: 'refreshUsers'
+        },
+        'button[action=delete]': {
+            click: 'deleteUsers'
+        },
+        'button[action=sync]': {
+            click: 'sync'
         }
     },
     editUser: function(grid, record) {
         PH.utils.CommonUtils.showEditDialog ('userEdit', record, function(win) {
             var values = win.down('form').getValues();
             record.set(values);
-            grid.getStore().sync();
+            grid.getStore().sync({
+                success: function(batch, opts) {
+                    win.close();
+                },
+                failure: function (batch, opts) {
+                    grid.getStore().load();
+
+                    if (batch.hasException) {
+                        for (var i in batch.exceptions) {
+                            Ext.Msg.alert('Failure', batch.exceptions[i].getError());
+                        }
+                    }
+                }
+            });
             win.close();
         }, this);
     },
-    updateUser: function(button) {
-        var win = button.up('window'),
-                form = win.down('form'),
-                record = form.getRecord(),
-                values = form.getValues();
+    createUser: function() {
+        var self = this;
+        PH.utils.CommonUtils.showEditDialog ('userEdit', null, function(win) {
+            var values = win.down('form').getValues();
+            var record = self.getView().getStore().add(values);
+            // special fix for ExtJS without this flag store noy send new added record to server
+            record[0].phantom = true;
 
-        record.set(values);
-        win.close();
+            self.getView().getStore().sync({
+                success: function(batch, opts) {
+                    win.close();
+                },
+                failure: function (batch, opts) {
+                    grid.getStore().load();
+
+                    if (batch.hasException) {
+                        for (var i in batch.exceptions) {
+                            Ext.Msg.alert('Failure', batch.exceptions[i].getError());
+                        }
+                    }
+                }
+            })
+        }, this, true);
     },
-    syncUser: function(button) {
+
+    deleteUser: function(button) {
+        // var win = button.up('window'),
+        //         form = win.down('form'),
+        //         record = form.getRecord(),
+        //         values = form.getValues();
+        //
+        // record.set(values);
+        // win.close();
+    },
+    refreshUsers: function(button) {
+        this.getView().getStore().load();
+    },
+    sync: function(button) {
         this.getView().getStore().sync();
     }
 });

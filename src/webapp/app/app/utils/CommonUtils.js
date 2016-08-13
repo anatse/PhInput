@@ -12,6 +12,7 @@ Ext.define ('PH.utils.CommonUtils', {
         if (grp) {
             return grp[value] ? grp[value] : grp + '.' + value;
         }
+
         return group + '.' + value;
     },
     
@@ -84,7 +85,7 @@ Ext.define ('PH.utils.CommonUtils', {
         return value;
     },
 
-    showEditDialog: function (dialog, record, callback, scope) {
+    showEditDialog: function (dialog, record, callback, scope, isNew) {
         var win = Ext.create('Ext.window.Window', {
             title: PH.utils.CommonUtils.getLocaleString ('titles', dialog),
             layout: 'fit',
@@ -110,7 +111,14 @@ Ext.define ('PH.utils.CommonUtils', {
         });
 
         // load record data
-        win.down('form').loadRecord(record);
+        if (!isNew)
+            win.down('form').loadRecord(record);
+        else {
+            var pass = win.down('form').getForm().findField("password");
+            if (pass)
+                pass.hidden = false;
+        }
+
         win.on ('destroy', callback, scope);
         win.show();
     },

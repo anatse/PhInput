@@ -1,21 +1,17 @@
 package org.asem.orient.services
 
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
+import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import org.asem.orient.model.CookieAuthenticator._
 import org.asem.orient.model.Report
 import org.asem.orient.{Database, Query}
-import spray.routing.HttpService
-import org.asem.orient.model.CookieAuthenticator._
 import spray.http._
-import spray.httpx.SprayJsonSupport._
-import spray.routing.{HttpService, _}
 import MediaTypes._
-import com.orientechnologies.orient.core.Orient
-import com.tinkerpop.blueprints.impls.orient.OrientVertex
-import sun.security.provider.certpath.Vertex
+import spray.httpx.SprayJsonSupport._
+import spray.routing.HttpService
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by gosha-user on 13.08.2016.
@@ -35,15 +31,36 @@ object ReportService extends BaseDB {
     * @param report report object to save
     * @return error message if occurred
     */
-  def createReport(report: Report): String = {
+  def createReport(report: Report): Either[OrientVertex, String] = {
     try {
-      val vtx = Database.getTx(addVertex("Report", rep2Map(report)))
-      ""
+      val vtx = Database.getTx(addVertex("Report", rep2Map(report).filterKeys(_ != "id")))
+      Left(vtx)
     }
     catch {
-      case e:ORecordDuplicatedException => "duplicate_index"
-      case e:Exception => e.toString
+      case e:ORecordDuplicatedException => Right("duplicate_index")
+      case e:Exception => Right(e.toString)
     }
+  }
+
+  def changeReport(reportId:String, report: Report): Either[OrientVertex, String] = {
+    Database.getTx(
+      graph => {
+        try {
+          graph.getVertex("#" + reportId) match {
+            case vtx: OrientVertex => {
+              vertexUpdate (vtx, rep2Map(report).filterKeys(_ != "id"))
+              vtx.save
+              graph.commit()
+              Left(vtx)
+            }
+            case _ => Right("Error updating record: " + "#" + reportId)
+          }
+        }
+        catch {
+          case e:Exception => Right(e.toString)
+        }
+      }
+    )
   }
 
   /**
@@ -69,18 +86,17 @@ object ReportService extends BaseDB {
     * @return success flag
     */
   def deleteById (rep:Report):Boolean = {
-    Database.getTx(tx => {
-      tx.getVertex(rep.id) match {
-          case vtx:OrientVertex => {
-            deleteVertex(tx, vtx)
-          }
-          case _ => false
-      }
+    deleteById(rep.id)
+  }
 
-//      findVertexByAttrs(tx, "Report", Array("city", "street", "building"), Array(rep.city, rep.street, rep.building)) match {
-//        case Some(vtx) => deleteVertex(tx, vtx)
-//        case _ => false
-//      }
+  def deleteById (id:String):Boolean = {
+    Database.getTx(tx => {
+      tx.getVertex("#" + id) match {
+        case vtx:OrientVertex => {
+          deleteVertex(tx, vtx)
+        }
+        case _ => false
+      }
     })
   }
 }
@@ -89,9 +105,10 @@ object ReportService extends BaseDB {
   * Trait represents REST functions to work with reports
   */
 trait ReportService extends HttpService {
+
   private val listReportsRouter = get {
     authenticate(byCookie) {
-      user => {
+      user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
         path("report") {
           complete {
             ReportService.findAllUserReports(user.login).toArray[Report]
@@ -101,5 +118,77 @@ trait ReportService extends HttpService {
     }
   }
 
-  lazy val reportRoute = listReportsRouter
+  private val addReportsRouter = post {
+    authenticate(byCookie) {
+      user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
+        path("report") {
+          entity(as[Report]) {
+            report => {
+              ReportService.createReport(report) match {
+                case Left(vtx) => {
+                  val Report(rep) = vtx
+                  respondWithStatus(StatusCodes.Created) { complete (rep)}
+                }
+                case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private val deleteReportRouter = delete {
+    authenticate(byCookie) {
+      user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
+        path("report" / Segment) {
+          reportId => {
+            complete {
+              ReportService.deleteById(reportId)
+              "OK"
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private val getReportRouter = get {
+    authenticate(byCookie) {
+      user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
+        path("report" / Segment) {
+          reportId => {
+            respondWithMediaType(`application/json`)
+            complete {
+              "OK" + reportId
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private val updateReportRouter = put {
+    authenticate(byCookie) {
+      user => setCookie(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))) {
+        path("report" / Segment) {
+          reportId => {
+            entity(as[Report]) {
+              report => {
+                ReportService.changeReport(reportId, report) match {
+                  case Left(vtx) => {
+                    val Report(rep) = vtx
+                    respondWithStatus(StatusCodes.OK   ) { complete (rep)}
+                  }
+                  case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  lazy val reportRoute = listReportsRouter ~ addReportsRouter ~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
 }

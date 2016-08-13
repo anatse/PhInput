@@ -1,14 +1,13 @@
 package org.asem.orient.model
 
-import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import com.typesafe.config.ConfigFactory
 import org.asem.orient.Query
 import org.asem.spray.security.RSA
-import spray.http.{HttpCookie, HttpForm, HttpHeader, HttpResponse}
+import spray.http.HttpForm
 import spray.httpx.unmarshalling._
 import spray.routing.AuthenticationFailedRejection.CredentialsMissing
 import spray.routing.authentication._
-import spray.routing.{AuthenticationFailedRejection, RequestContext, StandardRoute}
+import spray.routing.{AuthenticationFailedRejection, RequestContext}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,7 +60,7 @@ class CookieAuthenticator {
         if (user != null) {
           val pu = loadUser(user.login, user.pwdHash)
           if (pu.isDefined) {
-            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString), pu.get.manager))
+            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString), pu.get.manager.getOrElse(false)))
           }
         }
       }
@@ -71,7 +70,7 @@ class CookieAuthenticator {
       val pu = PhUser.fromString (userData)
 
       if (pu.isDefined) {
-        ret = Some(UserData(pu.get.login, userToken.get.content, pu.get.manager))
+        ret = Some(UserData(pu.get.login, userToken.get.content, pu.get.manager.getOrElse(false)))
       }
     }
 

@@ -17,13 +17,14 @@
 package spray.testkit
 
 import java.util.concurrent.CountDownLatch
-import concurrent.duration._
-import scala.collection.mutable.ListBuffer
-import akka.actor.{ ActorSystem, Status, ActorRefFactory, ActorRef }
+
+import akka.actor.{ActorRef, ActorRefFactory, ActorSystem, Status}
 import akka.spray.UnregisteredActorRef
-import akka.testkit._
-import spray.routing.{ RejectionHandler, Rejected, Rejection }
 import spray.http._
+import spray.routing.{Rejected, Rejection, RejectionHandler}
+
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration._
 
 trait RouteResultComponent {
 

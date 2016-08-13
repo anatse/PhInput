@@ -16,9 +16,6 @@
 
 package spray.testkit
 
-import org.scalatest.exceptions.TestFailedException
-import org.scalatest.{ Suite, BeforeAndAfterAll }
-
 trait ScalatestInterface extends TestFrameworkInterface with BeforeAndAfterAll {
   this: Suite ⇒
 

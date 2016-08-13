@@ -1,6 +1,7 @@
 {
     "menuItemList": [{
         "name": "security",
+        "role": "manager",
         "leaf": false,
         "menuItemList": [{
                 "name": "users",
@@ -15,5 +16,9 @@
                 "leaf": false
             }
         ]
+    }, {
+        "name": "reports",
+        "leaf": true,
+        "module": "reports"
     }]
 }

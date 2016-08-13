@@ -1,28 +1,21 @@
 package org.asem.orient.services
 
-import org.asem.orient.model.Report
-import org.asem.orient.services.ReportService
 import org.joda.time.DateTime
 import org.scalatest._
-import akka.testkit._
-import spray.routing._
 import spray.http._
-import org.asem.orient.model._
-import org.asem.orient.services._
-import org.scalatest._
+import spray.routing._
 import spray.testkit._
-import spray.json._
-import spray.httpx.SprayJsonSupport._
-import HttpMethods._
-import MediaTypes._
-import HttpCharsets._
-import StatusCodes._
 import HttpHeaders._
+import StatusCodes._
+import org.asem.orient.model.Report
+import spray.httpx.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol._
+import spray.json._
 
 /**
   * Created by gosha-user on 13.08.2016.
   */
-class ReportTest  extends FlatSpec
+class ReportServiceTest extends FlatSpec
                     with Matchers
                     with Directives
                     with ScalatestRouteTest
@@ -53,18 +46,32 @@ class ReportTest  extends FlatSpec
 
   "Report service" should "convert all fields of report object to map in runtime" in {
     val map = ReportService.rep2Map(rep)
-    map shouldNot be (null)
-    map.isEmpty should be(false)
+    map should not be empty
   }
 
+  var repSaved:Report = null
   it should "create new report row" in {
-    val err = ReportService.createReport(rep)
-    err should be("")
+    ReportService.createReport(rep) match {
+      case Left(v) => {
+        v should not be null
+        repSaved = v match {
+          case Report(x) => x
+        }
+      }
+      case Right(s) => fail("error creating reopport " + s)
+    }
   }
 
   it should "thrown an error when trying to create new report with the same address" in {
-    val err = ReportService.createReport(rep)
-    err should be("duplicate_index")
+    ReportService.createReport(rep) match {
+      case Left(v) => fail("test not passed new record created")
+      case Right(err) => err should be("duplicate_index")
+    }
+  }
+
+  it should "delete report by id" in {
+    val err = ReportService.deleteById (repSaved)
+    err should be (true)
   }
 
   "Report http service" should "request for user credentials" in {
@@ -87,20 +94,50 @@ class ReportTest  extends FlatSpec
   }
 
   var resp:JsValue = null
+  it should "create new report fro currently logged user" in {
+    Post("/report", rep) ~> setTestCookie ("user_token", cookie) ~> sealRoute(reportRoute) ~> check {
+      status should equal(Created)
+      val Report(repo) = JsonParser(responseAs[String]) match {
+        case o:JsObject => o
+      }
+
+      repo.login should be("user")
+    }
+  }
+
   it should "retrieve all reports for currently logged user" in {
     Get("/report") ~> setTestCookie ("user_token", cookie) ~> sealRoute(reportRoute) ~> check {
       status should equal(OK)
       resp = JsonParser(responseAs[String])
+      val Report(repo) = resp match {
+        case o:JsObject => o
+        case JsArray(a) => a.head.asJsObject
+      }
+
+      repSaved = repo
     }
   }
 
-  it should "delete report by id" in {
-    val Report(repo) = resp match {
-      case o:JsObject => o
-      case JsArray(a) => a.head.asJsObject
-    }
+  it should "update fields in report object" in {
+    val user = Map("street" -> "lenina")
+    Put("/report/" + repSaved.id, user) ~> setTestCookie ("user_token", cookie) ~> sealRoute(reportRoute) ~> check {
+      println (responseAs[String])
 
-    val err = ReportService.deleteById (repo)
-    err should be (true)
+      status should equal(OK)
+      resp = JsonParser(responseAs[String])
+      val Report(repo) = resp match {
+        case o:JsObject => o
+        case JsArray(a) => a.head.asJsObject
+      }
+
+      repSaved = repo
+      repSaved.street should be ("lenina")
+    }
+  }
+
+  it should "delete report by report id" in {
+    Delete("/report/" + repSaved.id) ~> setTestCookie ("user_token", cookie) ~> sealRoute(reportRoute) ~> check {
+      status should equal(OK)
+    }
   }
 }

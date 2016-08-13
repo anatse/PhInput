@@ -1,20 +1,14 @@
 package org.asem.orient.services
 
-import akka.testkit._
-import spray.routing._
-import spray.http._
-import HttpMethods._
-import MediaTypes._
-import HttpCharsets._
-import StatusCodes._
-import HttpHeaders._
 import org.asem.orient.model._
-import org.asem.orient.model.PhUser._
-import org.asem.orient.services._
 import org.scalatest._
+import spray.http._
+import spray.routing._
 import spray.testkit._
-import spray.json._
+import HttpHeaders._
+import StatusCodes._
 import spray.httpx.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol._
 
 class PhUserServiceTest extends FlatSpec 
                     with Matchers 
@@ -71,10 +65,10 @@ class PhUserServiceTest extends FlatSpec
       login = "demo", 
       password = "demo", 
       email = "demo@demo.com", 
-      manager = true,
+      manager = Some(true),
       firstName = "user",
       secondName = "demonstration",
-      activated = true
+      activated = Some(true)
     )
     Put("/user/demo", user) ~> setTestCookie ("user_token", cookie) ~> sealRoute(userManagementRoute) ~> check {
       status should equal(OK)
@@ -106,7 +100,7 @@ class PhUserServiceTest extends FlatSpec
 //      println (responseAs[String])
     }
   }
-  
+
   it should "remove user by login" in {
     Delete("/user/demo") ~> setTestCookie ("user_token", cookie) ~> sealRoute(userManagementRoute) ~> check {
       status should equal(OK)

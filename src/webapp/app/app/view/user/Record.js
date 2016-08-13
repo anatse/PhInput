@@ -16,6 +16,12 @@ Ext.define('PH.view.user.Record', {
             xtype: 'textfield',
             name: 'login'
         }, {
+            fieldLabel: PH.utils.CommonUtils.getLocaleString ('fields', 'password'),
+            xtype: 'textfield',
+            inputType: 'password',
+            name: 'password',
+            hidden: true
+        }, {
             fieldLabel: PH.utils.CommonUtils.getLocaleString ('fields', 'email'),
             xtype: 'textfield',
             name: 'email'

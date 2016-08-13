@@ -16,9 +16,6 @@
 
 package spray.testkit
 
-import org.specs2.execute.{ Failure, FailureException }
-import org.specs2.specification.{ FragmentsBuilder, SpecificationStructure, Fragments, Step }
-
 trait Specs2Interface extends TestFrameworkInterface with SpecificationStructure {
 
   def failTest(msg: String) = {

@@ -17,14 +17,13 @@
 package spray.testkit
 
 import java.net.InetSocketAddress
-import com.typesafe.config.{ ConfigFactory, Config }
-import org.scalatest.Suite
-import akka.testkit.{ TestActorRef, TestProbe }
+
 import akka.actor._
-import spray.util._
-import spray.io._
-import akka.event.{ Logging, LoggingAdapter }
+import akka.event.{Logging, LoggingAdapter}
 import akka.util.ByteString
+import com.typesafe.config.{Config, ConfigFactory}
+import spray.io._
+import spray.util._
 
 trait RawPipelineStageTest { test ⇒
   type Context <: PipelineContext

@@ -2,10 +2,6 @@ package org.asem.orient.model
 
 import java.util.Date
 //import scala.reflect.runtime.{universe => ru}
-import spray.json.DefaultJsonProtocol
-import spray.json.JsValue
-import spray.json.RootJsonFormat
-import scala.reflect.ClassTag
 
 /**
   * Created by gosha-user on 07.08.2016.

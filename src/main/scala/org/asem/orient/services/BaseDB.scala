@@ -10,17 +10,23 @@ trait BaseDB {
   def addVertex(clazz: String, params: Map[String, Any]): OrientGraph => OrientVertex = {
     tx => {
       var vtx = tx.addVertex("class:" + clazz, java.util.Collections.EMPTY_MAP)
-      params.foreach((e: (String, Any)) => {
-        if (e._2.isInstanceOf[DateTime])
-          vtx.setProperty(e._1, e._2.asInstanceOf[DateTime].toDate)
-        else if (e._2 != null)
-          vtx.setProperty(e._1, e._2)
-      })
-
+      vertexUpdate(vtx, params)
       vtx.save()
       tx.commit()
       vtx
     }
+  }
+
+  def vertexUpdate (vtx:OrientVertex, params: Map[String, Any]): Unit = {
+    params.foreach((e: (String, Any)) => {
+      e._2 match {
+        case d:DateTime => vtx.setProperty(e._1, d.toDate)
+        case Some(b) => b
+        case null =>
+        case None =>
+        case _ => vtx.setProperty(e._1, e._2)
+      }
+    })
   }
 
   def findVertexByAttr(tx: OrientGraph, clazz: String, attrName: String, attr: Object): Option[OrientVertex] = {
@@ -32,6 +38,19 @@ trait BaseDB {
       None
   }
 
+  /**
+    * Sample usage
+    *   findVertexByAttrs(tx, "Report", Array("city", "street", "building"), Array(rep.city, rep.street, rep.building)) match {
+    *    case Some(vtx) => deleteVertex(tx, vtx)
+    *     case _ => false
+    *   }
+    *
+    * @param tx
+    * @param clazz
+    * @param attrNames
+    * @param attrValues
+    * @return
+    */
   def findVertexByAttrs(tx: OrientGraph, clazz: String, attrNames:Array[String], attrValues:Array[Object]): Option[OrientVertex] = {
     val vtxs = tx.getVertices(clazz, attrNames, attrValues)
     if (vtxs.iterator.hasNext) {

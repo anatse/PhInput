@@ -1,17 +1,15 @@
 package org.asem.orient.services
 
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
-import org.asem.orient.Database
-import org.asem.orient.Query
+import org.asem.orient.{Database, Query}
 import org.asem.orient.model.CookieAuthenticator._
-import org.asem.orient.model.PhUser
 import org.asem.orient.model.PhUser._
+import org.asem.orient.model.{PhUser, UserData}
+import spray.http.MediaTypes._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.routing.{HttpService, _}
-import MediaTypes._
 
-import org.asem.orient.model.UserData
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -22,7 +20,7 @@ object PhUserService extends BaseDB {
     * Function create new user and activated it
     */
   def createUser(login: String, pasword: String, email: String, firstName: String, secondName: String): Unit = {
-    val user = PhUser(login, pasword, email, firstName, secondName, true)
+    val user = PhUser(login, pasword, email, firstName, secondName, Some(true))
     createUser(user)
   }
 
@@ -86,25 +84,35 @@ object PhUserService extends BaseDB {
     * @return success flag
     */
   def changeUser(user: PhUser): Boolean = {
-    Database.getTx(
-      graph => {
-        findVertexByAttr(graph, "PhUser", "login", user.login) match {
-          case Some(vtx: OrientVertex) => {
-            if (user.pwdHash != null && !user.pwdHash.isEmpty) vtx.setProperty("password", user.pwdHash)
-            if (user.email != null) vtx.setProperty("email", user.email)
-            if (user.firstName != null) vtx.setProperty("firstName", user.firstName)
-            if (user.secondName != null) vtx.setProperty("secondName", user.secondName)
-            vtx.setProperty("manager", user.manager)
-            vtx.setProperty("activated", user.activated)
-            vtx.save
-            true
-          }
-          case _ => {
-            false
+    try {
+      Database.getTx(
+        graph => {
+          findVertexByAttr(graph, "PhUser", "login", user.login) match {
+            case Some(vtx: OrientVertex) => {
+              if (user.pwdHash != null && !user.pwdHash.isEmpty) vtx.setProperty("password", user.pwdHash)
+              if (user.email != null) vtx.setProperty("email", user.email)
+              if (user.firstName != null) vtx.setProperty("firstName", user.firstName)
+              if (user.secondName != null) vtx.setProperty("secondName", user.secondName)
+
+              if (user.manager.isDefined)
+                vtx.setProperty("manager", user.manager.get)
+
+              if (user.activated.isDefined)
+                vtx.setProperty("activated", user.activated.get)
+
+              vtx.save
+              true
+            }
+            case _ => {
+              false
+            }
           }
         }
-      }
-    )
+      )
+    }
+    catch {
+      case e:Exception => false
+    }
   }
 
   /**
@@ -150,6 +158,7 @@ object PhUserService extends BaseDB {
     */
   def findAllUsers () = {
     import java.util.{Collections => JavaCollections}
+
     import scala.collection.JavaConversions._
 
     val result = Query.executeQuery("select * from PhUser", JavaCollections.EMPTY_MAP)
@@ -177,13 +186,13 @@ trait PhUserService extends HttpService {
          newUser => {
            if (newUser.email == null || newUser.email.isEmpty) {
              respondWithStatus(StatusCodes.BadRequest) {
-               complete("Email should be provided")
+               complete("{sucess: false, message: 'Email should be provided'}")
              }
            }
            else {
              PhUserService.createUser(newUser)
              respondWithStatus(StatusCodes.Created) {
-               complete("OK " + newUser.login)
+               complete("{success: true, message: 'OK'}")
              }
            }
          }
@@ -202,7 +211,7 @@ trait PhUserService extends HttpService {
               }
               else {
                 PhUserService.changeUser(changePass)
-                complete ("OK " + changePass)
+                complete("{success: true, message: 'OK'}")
               }
             }
           }
@@ -218,7 +227,7 @@ trait PhUserService extends HttpService {
     else {
       respondWithStatus(StatusCodes.Forbidden) {
         complete {
-          "Forbidden " + user.login + " = " + user.manager
+          "{success: false, message: 'Forbidden " + user.login + " = " + user.manager + "'}"
         }
       }
     }
@@ -232,7 +241,7 @@ trait PhUserService extends HttpService {
             isManager (user, 
               complete {
                 PhUserService.deleteUserByLogin(login)
-                "OK"
+                "{success: true, message: 'OK'}"
               }
             )
           }
@@ -255,7 +264,7 @@ trait PhUserService extends HttpService {
                     user
                   }
                   else {
-                    ""
+                    "{success: false, message: 'no data'}"
                   }
                 }
               )

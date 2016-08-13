@@ -3,24 +3,22 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title id="page-title">Account Manager</title>
+    <title id="page-title">Pharmacy</title>
     
     <script type="text/javascript" src="../js/ext-all.js"></script>
     <script>
-      "use strict";
-
       Ext.Loader.setConfig({
         paths: {
           'PH': 'app'
         }
       });
 
-      window.GLang = navigator.language;
+      GLang = navigator.language.split('-')[0];
       Ext.require ('PH.locale.' + GLang);
       Ext.require('PH.utils.CommonUtils');
 
       Ext.onReady (function() {
-        window.GLocale = PH.locale[GLang];
+        GLocale = PH.locale[GLang];
 
         // loading app.js
         Ext.Ajax.request({

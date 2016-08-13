@@ -16,17 +16,17 @@
 
 package spray.testkit
 
-import com.typesafe.config.{ ConfigFactory, Config }
-import scala.util.DynamicVariable
-import scala.reflect.ClassTag
-import org.scalatest.Suite
 import akka.actor.ActorSystem
-import spray.routing.directives.ExecutionDirectives
-import spray.routing._
-import spray.httpx.unmarshalling._
-import spray.httpx._
+import com.typesafe.config.{Config, ConfigFactory}
 import spray.http._
+import spray.httpx._
+import spray.httpx.unmarshalling._
+import spray.routing._
+import spray.routing.directives.ExecutionDirectives
 import spray.util._
+
+import scala.reflect.ClassTag
+import scala.util.DynamicVariable
 
 trait RouteTest extends RequestBuilding with RouteResultComponent {
   this: TestFrameworkInterface ⇒

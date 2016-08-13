@@ -4,8 +4,7 @@
 
 package spray.testkit
 
-import akka.actor.{ Terminated, ActorSystem, ActorRef }
-import akka.testkit.TestProbe
+import akka.actor.{ActorRef, ActorSystem, Terminated}
 
 object TestUtils {
 

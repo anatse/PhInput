@@ -1,4 +1,4 @@
-package org.asem
+package org.asem.orient.services
 
 import org.asem.orient._
 import org.asem.orient.model.PhUser
@@ -6,7 +6,6 @@ import org.asem.spray.security.RSA
 import org.scalatest._
 
 import scala.concurrent.Await
-import scala.xml._
 import scala.concurrent.duration._
 
 class XMLTest extends FlatSpec with Matchers {

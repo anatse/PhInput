@@ -1,14 +1,17 @@
-
-Ext.define('PH.view.user.List', {
+Ext.define('PH.view.report.List', {
     extend: 'Ext.grid.Panel',
-    alias: 'widget.users',
+    alias: 'widget.reports',
 
     requires: [
-        'PH.store.Users',
-        'PH.view.user.ListController',
-        'PH.view.user.Record'
+        'PH.store.Reports',
+        'PH.view.report.ListController',
+        'PH.view.report.Record'
     ],
-    controller: 'userList',
+    controller: 'reportList',
+    columns: [
+        {header: 'Name', dataIndex: 'name', flex:1},
+        {header: 'Email', dataIndex: 'email', flex:1}
+    ],
     tbar: [{
         xtype: 'button',
         action: 'refresh',
@@ -21,18 +24,10 @@ Ext.define('PH.view.user.List', {
         xtype: 'button',
         action: 'delete',
         text: PH.utils.CommonUtils.getLocaleString('button', 'delete')
-    }, {
-        xtype: 'button',
-        action: 'sync',
-        text: PH.utils.CommonUtils.getLocaleString('button', 'sync')
     }],
-    columns: [
-        {header: 'Name', dataIndex: 'name', flex:1},
-        {header: 'Email', dataIndex: 'email', flex:1}
-    ],
     initComponent: function () {
-        this.store = Ext.create('PH.store.Users', {
-            storeId: 'users'
+        this.store = Ext.create('PH.store.Reports', {
+            storeId: 'reports'
         });
         this.columns = [
             {header: 'Name', dataIndex: 'name', flex:1},
