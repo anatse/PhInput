@@ -8,7 +8,7 @@ import spray.routing._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait LoginService extends HttpService {
-  val loginRoute =
+  val loginRoute = 
     path("login") {
       post {
         authenticate(byCookie) {

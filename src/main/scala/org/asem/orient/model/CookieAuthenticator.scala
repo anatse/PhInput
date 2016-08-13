@@ -1,5 +1,6 @@
 package org.asem.orient.model
 
+import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import com.typesafe.config.ConfigFactory
 import org.asem.orient.Query
 import org.asem.spray.security.RSA
@@ -14,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-case class UserData (login:String, token:String)
+case class UserData (login:String, token:String, manager:Boolean)
 
 /**
   * Created by gosha-user on 30.07.2016.
@@ -31,11 +32,8 @@ class CookieAuthenticator {
     // .toLowerCase()
     val result = Query.executeQuery("SELECT * FROM PhUser WHERE login = :login and password = :password", params)
     if (result.size() == 1) {
-      val row = result.get(0)
-      Some(PhUser(row.getProperty("login"), "",
-        row.getProperty("email"),
-        row.getProperty("firstName"),
-        row.getProperty("secondName")))
+      val PhUser(user) = result.get(0)
+      Some(user)
     }
     else
       None
@@ -63,7 +61,7 @@ class CookieAuthenticator {
         if (user != null) {
           val pu = loadUser(user.login, user.pwdHash)
           if (pu.isDefined) {
-            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString)))
+            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString), pu.get.manager))
           }
         }
       }
@@ -73,7 +71,7 @@ class CookieAuthenticator {
       val pu = PhUser.fromString (userData)
 
       if (pu.isDefined) {
-        ret = Some(UserData(pu.get.login, userToken.get.content))
+        ret = Some(UserData(pu.get.login, userToken.get.content, pu.get.manager))
       }
     }
 
@@ -91,14 +89,6 @@ class CookieAuthenticator {
       } 
     }
   }
-
-//  def setCookie1 (user: UserData): RequestContext => RequestContext = {
-//    import spray.http.HttpHeaders._
-//    ctx => {
-//      val h = List(`Set-Cookie`(HttpCookie(name = "user_token", content = user.token, maxAge = Some(600))))
-//      ctx.withHttpResponseHeadersMapped (h ::: _)
-//    }
-//  }
 }
 
 object CookieAuthenticator extends CookieAuthenticator

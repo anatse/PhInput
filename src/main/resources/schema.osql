@@ -95,3 +95,12 @@ CREATE INDEX UxWorker ON Worker(out,in) UNIQUE;
 CREATE CLASS Manager EXTENDS Worker;
 CREATE CLASS Employee EXTENDS Worker;
 CREATE CLASS Owner EXTENDS Worker;
+
+CREATE CLASS Report EXTENDS V;
+create property Report.city String;
+create property Report.street string;
+create property Report.building string;
+alter property Report.city mandatory true;
+alter property Report.street mandatory true;
+alter property Report.building mandatory true;
+CREATE INDEX UxReportAddress ON Report(city,street,building) UNIQUE;

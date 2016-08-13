@@ -6,6 +6,7 @@ import org.asem.spray.security.RSA
 import org.scalatest._
 
 import scala.concurrent.Await
+import scala.xml._
 import scala.concurrent.duration._
 
 class XMLTest extends FlatSpec with Matchers {
@@ -38,6 +39,12 @@ class XMLTest extends FlatSpec with Matchers {
 //    println(printer.format(xml))
   }
 
+  it should "read from database and store to XML with different root element" in {
+    val xml = Database.queryToXml("child", "SELECT * FROM PhUser", Map())
+    val printer = new scala.xml.PrettyPrinter(80, 2)
+//    println(printer.format(xml))
+  }
+
   "RSA" should "load keystore from file" in {
     RSA.isInitialized should be (true)
   }
@@ -55,9 +62,9 @@ class XMLTest extends FlatSpec with Matchers {
 //    println (decryptedData)
   }
 
-  val user = PhUser("demo", "demo", "demo@demo.org", "firstname", "secondName")
+  val user = PhUser(login = "demo", password = "demo", email = "demo@demo.org", firstName = "firstname", secondName = "secondName")
   "PhUser" should "be printed to string" in {
-    user.toString should be ("demo,demo@demo.org,firstname,secondName")
+    user.toString should be ("demo,demo@demo.org,firstname,secondName,false")
   }
 
   it should "be unapplied from string" in {

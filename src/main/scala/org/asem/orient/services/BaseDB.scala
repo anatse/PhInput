@@ -1,6 +1,7 @@
 package org.asem.orient.services
 
-import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
+import com.tinkerpop.blueprints.impls.orient.{OrientEdge, OrientGraph, OrientVertex}
+import org.joda.time.DateTime
 
 /**
  * Created by gosha-user on 30.07.2016.
@@ -10,29 +11,32 @@ trait BaseDB {
     tx => {
       var vtx = tx.addVertex("class:" + clazz, java.util.Collections.EMPTY_MAP)
       params.foreach((e: (String, Any)) => {
-        if (e._2 != null)
+        if (e._2.isInstanceOf[DateTime])
+          vtx.setProperty(e._1, e._2.asInstanceOf[DateTime].toDate)
+        else if (e._2 != null)
           vtx.setProperty(e._1, e._2)
       })
 
-      try {
-        vtx.save()
-      } 
-      catch {
-        case ex: Exception => {
-            vtx = null
-        }
-      }
-
+      vtx.save()
+      tx.commit()
       vtx
     }
   }
 
   def findVertexByAttr(tx: OrientGraph, clazz: String, attrName: String, attr: Object): Option[OrientVertex] = {
     val vtxs = tx.getVertices(clazz, Array(attrName), Array(attr))
-    println("attrName: " + attrName + " = " + attr + ": " + vtxs.iterator())
-
-    if (vtxs.iterator.hasNext)
+    if (vtxs.iterator.hasNext) {
       Some(vtxs.iterator.next.asInstanceOf[OrientVertex])
+    }
+    else
+      None
+  }
+
+  def findVertexByAttrs(tx: OrientGraph, clazz: String, attrNames:Array[String], attrValues:Array[Object]): Option[OrientVertex] = {
+    val vtxs = tx.getVertices(clazz, attrNames, attrValues)
+    if (vtxs.iterator.hasNext) {
+      Some(vtxs.iterator.next.asInstanceOf[OrientVertex])
+    }
     else
       None
   }
@@ -42,7 +46,17 @@ trait BaseDB {
       tx.removeVertex(vtx)
       true
     } catch {
-      case e: Exception => false
+      case e: Exception => {
+        false
+      }
+    }
+  }
+  
+  def ~>(vtxTo:OrientVertex): OrientVertex => String => OrientEdge = {
+    vtx => {
+      label => {
+        vtx.addEdge(label, vtxTo).asInstanceOf[OrientEdge]
+      }
     }
   }
 }

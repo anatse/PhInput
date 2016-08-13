@@ -1,9 +1,16 @@
 package org.asem.orient.services
 
-import org.scalatest._
-import spray.http.StatusCodes._
-import spray.http._
+import akka.testkit._
 import spray.routing._
+import spray.http._
+import HttpMethods._
+import MediaTypes._
+import HttpCharsets._
+import StatusCodes._
+import HttpHeaders._
+import org.asem.orient.model._
+import org.asem.orient.services._
+import org.scalatest._
 import spray.testkit._
 
 class LoginServiceTest extends FlatSpec 

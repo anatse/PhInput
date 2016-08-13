@@ -33,6 +33,27 @@ object Database {
       }
     </data>
   }
+
+  def queryToXml (tag:String,query: String, params:Map[String, Any]) = {
+    val result = Query.executeQuery(query, params)
+    val r = <data>
+    {
+      for {
+        row <- result
+      } yield {
+        <row>
+          {
+          for { prop <- row.getPropertyKeys } yield {
+            <attr name={prop}>{row.getProperty(prop)}</attr>
+          }
+          }
+        </row>
+      }
+    }
+    </data>
+
+    r.copy(label = tag)
+  }
   
   def getTx[T] (performs: OrientGraph => T):T = {
     val g = pool.getTx

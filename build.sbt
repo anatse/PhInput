@@ -21,6 +21,7 @@ libraryDependencies ++= {
 
     "com.typesafe.akka" %% "akka-actor" % akkaV,
     "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.5",
+    "org.scala-lang" % "scala-reflect" % "2.11.8",
 
     // Orient DB dependencies
     "com.orientechnologies" % "orientdb-core" % "2.2.4",
@@ -29,10 +30,10 @@ libraryDependencies ++= {
     "com.orientechnologies" % "orientdb-graphdb" % "2.2.4",
     "com.orientechnologies" % "orientdb-distributed" % "2.2.4",
     "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0",
+    "com.github.nscala-time" %% "nscala-time" % "2.12.0",
 
     "io.spray" %% "spray-testkit" % sprayV % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaV % "test",
-    //"org.specs2" %% "specs2-core" % "3.8.4" % "test",
     "org.scalatest" % "scalatest_2.11" % "2.2.6" % "test"
   )
 }

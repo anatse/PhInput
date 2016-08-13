@@ -1,8 +1,13 @@
 package org.asem
 
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
+import org.asem.orient._
 import org.asem.orient.services.PhUserService
 import org.scalatest._
+
+import scala.xml._
+import scala.concurrent.duration._
 
 class UserServiceTest extends FlatSpec with Matchers {
 

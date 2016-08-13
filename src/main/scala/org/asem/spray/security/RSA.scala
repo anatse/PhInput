@@ -55,4 +55,8 @@ object RSA {
     val ret = new String(cipher.doFinal(Base64.getDecoder.decode(data)));
     ret
   }
+  
+  def remove (data: String):Unit = {
+    cacheKeys.remove(data)
+  }
 }

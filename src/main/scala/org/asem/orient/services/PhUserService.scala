@@ -2,13 +2,16 @@ package org.asem.orient.services
 
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
 import org.asem.orient.Database
+import org.asem.orient.Query
 import org.asem.orient.model.CookieAuthenticator._
 import org.asem.orient.model.PhUser
 import org.asem.orient.model.PhUser._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.routing.{HttpService, _}
+import MediaTypes._
 
+import org.asem.orient.model.UserData
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -16,7 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 object PhUserService extends BaseDB {
   /**
-    * Fucntion create new user and activated it
+    * Function create new user and activated it
     */
   def createUser(login: String, pasword: String, email: String, firstName: String, secondName: String): Unit = {
     val user = PhUser(login, pasword, email, firstName, secondName, true)
@@ -34,7 +37,8 @@ object PhUserService extends BaseDB {
           "email" -> user.email,
           "firstName" -> user.firstName,
           "secondName" -> user.secondName,
-          "activated" -> (if (user.activated) 1 else 0))
+          "activated" -> user.activated,
+          "manager" -> user.manager)
       )
     )
   }
@@ -43,10 +47,15 @@ object PhUserService extends BaseDB {
     * Function registedr new user yet no activated
     */
   def registerNewUser(login: String, pasword: String, email: String, firstName: String, secondName: String) = {
-    val user = PhUser(login, pasword, email, firstName, secondName, false)
+    val user = PhUser(login, pasword, email, firstName, secondName)
     createUser(user)
   }
 
+  /**
+    * Fucntion retrieves user vertex by user login
+    * @param login user login
+    * @returnfound user vertex
+    */
   def findUserByLogin(login: String): Option[OrientVertex] = {
     Database.getTx(tx => {
       findVertexByAttr(tx, "PhUser", "login", login)
@@ -54,14 +63,14 @@ object PhUserService extends BaseDB {
   }
 
   /**
-    * Fucntion activated inactive user
+    * Function activated inactive user
     */
   def activateUser(login: String): Boolean = {
     Database.getTx(
       graph => {
         findVertexByAttr(graph, "PhUser", "login", login) match {
           case Some(vtx: OrientVertex) => {
-            vtx.setProperty("activated", 1)
+            vtx.setProperty("activated", true)
             vtx.save
             true
           }
@@ -71,15 +80,22 @@ object PhUserService extends BaseDB {
     )
   }
 
+  /**
+    * Function update user vertex in database
+    * @param user user data
+    * @return success flag
+    */
   def changeUser(user: PhUser): Boolean = {
     Database.getTx(
       graph => {
         findVertexByAttr(graph, "PhUser", "login", user.login) match {
           case Some(vtx: OrientVertex) => {
-            if (user.email != null) vtx.setProperty("password", user.pwdHash)
+            if (user.pwdHash != null && !user.pwdHash.isEmpty) vtx.setProperty("password", user.pwdHash)
             if (user.email != null) vtx.setProperty("email", user.email)
             if (user.firstName != null) vtx.setProperty("firstName", user.firstName)
             if (user.secondName != null) vtx.setProperty("secondName", user.secondName)
+            vtx.setProperty("manager", user.manager)
+            vtx.setProperty("activated", user.activated)
             vtx.save
             true
           }
@@ -127,46 +143,139 @@ object PhUserService extends BaseDB {
       }
     )
   }
+
+  /**
+    * Function retrieves list of all users
+    * @return all users from database
+    */
+  def findAllUsers () = {
+    import java.util.{Collections => JavaCollections}
+    import scala.collection.JavaConversions._
+
+    val result = Query.executeQuery("select * from PhUser", JavaCollections.EMPTY_MAP)
+    for {
+      row <- result
+    } yield {
+      val PhUser(user) = row
+      user
+    }
+  }
 }
 
+/**
+  * The trait defines routes for user management service. For all functions except register authentification is required.
+  * Implemented fucntions:
+  * <ul>
+  * <li>register - add new user</li>
+  * <li>REST functions for update delete and retrieve user information</li>
+  * </ul>
+  */
 trait PhUserService extends HttpService {
-  val userManagementRoute =
+  private val registerRoute = post {
     path("user" / "register") {
-      post {
-        entity(as[PhUser]) {
-          newUser => {
-            PhUserService.createUser(newUser)
-            respondWithStatus(StatusCodes.Created) {
-              complete("OK " + newUser.login)
-            }
-          }
-        }
-      }
-    } ~ authenticate(byCookie) {
-      currentUser => pathPrefix("user" / Segment) {
-        setCookie(HttpCookie(name = "user_token", content = currentUser.token, maxAge = Some(600)))
-        login => pathEnd {
-          put {
-            entity(as[PhUser]) {
-              changePass => {
-                if (currentUser.login != login) {
-                  reject(ValidationRejection("Cannot change password for another user"))
-                }
-                else {
-                  PhUserService.changeUser(changePass)
-                  complete {
-                    "OK"
-                  }
-                }
+       entity(as[PhUser]) {
+         newUser => {
+           if (newUser.email == null || newUser.email.isEmpty) {
+             respondWithStatus(StatusCodes.BadRequest) {
+               complete("Email should be provided")
+             }
+           }
+           else {
+             PhUserService.createUser(newUser)
+             respondWithStatus(StatusCodes.Created) {
+               complete("OK " + newUser.login)
+             }
+           }
+         }
+       }
+    }
+  }
+
+  private val changeUserRoute = put {
+    authenticate(byCookie) {
+      user => {
+        path ("user" / Segment) {
+          login => entity(as[PhUser]) {
+            changePass => {
+              if (changePass.login != login) {
+                respondWithStatus(StatusCodes.BadRequest) { complete ("Fail")}
               }
-            }
-          } ~ delete {
-            PhUserService.deleteUserByLogin(login)
-            complete {
-              "OK"
+              else {
+                PhUserService.changeUser(changePass)
+                complete ("OK " + changePass)
+              }
             }
           }
         }
       }
     }
+  }
+  
+  private def isManager (user:UserData, f: StandardRoute):RequestContext => Unit = {
+    if (user.manager) {
+      f
+    }
+    else {
+      respondWithStatus(StatusCodes.Forbidden) {
+        complete {
+          "Forbidden " + user.login + " = " + user.manager
+        }
+      }
+    }
+  }
+  
+  private val deleteUserRoute = delete {
+    authenticate(byCookie) {
+      user => {
+        path ("user" / Segment) {
+          login => {
+            isManager (user, 
+              complete {
+                PhUserService.deleteUserByLogin(login)
+                "OK"
+              }
+            )
+          }
+        }
+      }
+    }
+  }
+  
+  private val getUserByLoginRoute = get {
+    authenticate(byCookie) {
+      user => {
+        path ("user" / Segment) {
+          login => {
+            respondWithMediaType(`application/json`) {
+              isManager (user, 
+                complete {
+                  val vtx = PhUserService.findUserByLogin(login)
+                  if (vtx.isDefined) {
+                    val PhUser(user) = vtx.get
+                    user
+                  }
+                  else {
+                    ""
+                  }
+                }
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  private val userListRoute = get {
+    path ("user") {
+      respondWithMediaType(`application/json`) {
+        complete {
+          val users = PhUserService.findAllUsers;
+          users.toArray[PhUser]
+        }
+      }
+    }
+  }
+
+  val userManagementRoute = registerRoute ~ changeUserRoute ~ deleteUserRoute ~ getUserByLoginRoute ~ userListRoute
 }
