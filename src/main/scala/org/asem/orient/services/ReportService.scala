@@ -31,10 +31,16 @@ object ReportService extends BaseDB {
     * @param report report object to save
     * @return error message if occurred
     */
-  def createReport(report: Report): Either[OrientVertex, String] = {
+  def createReport(login:String, report: Report): Either[Report, String] = {
     try {
-      val vtx = Database.getTx(addVertex("Report", rep2Map(report).filterKeys(_ != "id")))
-      Left(vtx)
+      val rep = Database.getTx {
+        graph => {
+          val Report(vtx) = addVertex("Report", rep2Map(report).filterKeys(_ != "id") + ("login" -> login)).apply(graph)
+          vtx
+        }
+      }
+      println ("report saved: " + rep)
+      Left(rep)
     }
     catch {
       case e:ORecordDuplicatedException => Right("duplicate_index")
@@ -42,7 +48,7 @@ object ReportService extends BaseDB {
     }
   }
 
-  def changeReport(reportId:String, report: Report): Either[OrientVertex, String] = {
+  def changeReport(reportId:String, report: Report): Either[Report, String] = {
     Database.getTx(
       graph => {
         try {
@@ -51,7 +57,8 @@ object ReportService extends BaseDB {
               vertexUpdate (vtx, rep2Map(report).filterKeys(_ != "id"))
               vtx.save
               graph.commit()
-              Left(vtx)
+              val Report(rep) = vtx
+              Left(rep)
             }
             case _ => Right("Error updating record: " + "#" + reportId)
           }
@@ -124,12 +131,9 @@ trait ReportService extends HttpService {
         path("report") {
           entity(as[Report]) {
             report => {
-              ReportService.createReport(report) match {
-                case Left(vtx) => {
-                  val Report(rep) = vtx
-                  respondWithStatus(StatusCodes.Created) { complete (rep)}
-                }
-                case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }
+              ReportService.createReport(user.login, report) match {
+                case Left(rep) => respondWithStatus(StatusCodes.Created) (complete(rep))
+                case Right(s) => respondWithStatus(StatusCodes.Conflict) {complete(s)}
               }
             }
           }
@@ -176,8 +180,7 @@ trait ReportService extends HttpService {
             entity(as[Report]) {
               report => {
                 ReportService.changeReport(reportId, report) match {
-                  case Left(vtx) => {
-                    val Report(rep) = vtx
+                  case Left(rep) => {
                     respondWithStatus(StatusCodes.OK   ) { complete (rep)}
                   }
                   case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }

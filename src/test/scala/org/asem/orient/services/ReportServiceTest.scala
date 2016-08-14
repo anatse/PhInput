@@ -51,11 +51,11 @@ class ReportServiceTest extends FlatSpec
 
   var repSaved:Report = null
   it should "create new report row" in {
-    ReportService.createReport(rep) match {
+    ReportService.createReport(rep.login, rep) match {
       case Left(v) => {
         v should not be null
         repSaved = v match {
-          case Report(x) => x
+          case x:Report => x
         }
       }
       case Right(s) => fail("error creating reopport " + s)
@@ -63,7 +63,7 @@ class ReportServiceTest extends FlatSpec
   }
 
   it should "thrown an error when trying to create new report with the same address" in {
-    ReportService.createReport(rep) match {
+    ReportService.createReport(rep.login, rep) match {
       case Left(v) => fail("test not passed new record created")
       case Right(err) => err should be("duplicate_index")
     }

@@ -35,10 +35,12 @@ Ext.define("PH.view.report.ListController", {
             var record = self.getView().getStore().add(values);
             // special fix for ExtJS without this flag store noy send new added record to server
             record[0].phantom = true;
+            // record[0].set(values);
+            // self.getView().getStore().commitChanges();
 
             self.getView().getStore().sync({
                 success: function(batch, opts) {
-                    win.close();
+                    win.hide();
                 },
                 failure: function (batch, opts) {
                 }
@@ -47,6 +49,9 @@ Ext.define("PH.view.report.ListController", {
     },
     deleteReport: function (button) {
 
+    },
+    refreshReport: function (button) {
+        this.getView().getStore().load();
     },
     sync: function(button) {
         this.getView().getStore().sync();

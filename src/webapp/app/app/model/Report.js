@@ -11,11 +11,11 @@ Ext.define('PH.model.Report', {
         'agreements',
         'managerName',
         {
-            name: 'managerPhone',
-            validators: {
-                type: 'format',
-                matcher: /(\d{3})\d{3}\-\d{4}/
-            }
+            name: 'managerPhone'
+            // validators: {
+            //     type: 'format',
+            //     matcher: /(\d{3})\d{3}\-\d{4}/
+            // }
         },
         'tradeRoomPhone',
         {

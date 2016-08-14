@@ -19,7 +19,7 @@ Ext.define("PH.view.user.ListController", {
             click: 'refreshUsers'
         },
         'button[action=delete]': {
-            click: 'deleteUsers'
+            click: 'deleteUser'
         },
         'button[action=sync]': {
             click: 'sync'
@@ -53,10 +53,11 @@ Ext.define("PH.view.user.ListController", {
             var record = self.getView().getStore().add(values);
             // special fix for ExtJS without this flag store noy send new added record to server
             record[0].phantom = true;
+            // self.getView().getStore().commitChanges();
 
             self.getView().getStore().sync({
                 success: function(batch, opts) {
-                    win.close();
+                    win.hide();
                 },
                 failure: function (batch, opts) {
                     grid.getStore().load();
