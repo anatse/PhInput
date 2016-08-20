@@ -6,6 +6,8 @@ import java.util._
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import spray.json._
 
+import scala.language.implicitConversions
+
 /**
   * Class represents user for pharmacy input system
   * Created by gosha-user on 30.07.2016.
@@ -35,7 +37,7 @@ case class PhUser(login: String, password: String, email: String = "", firstName
 /**
   * Object used to deserialize PhUser from string, using scala regexp unapply function
   */
-object PhUser extends DefaultJsonProtocol {
+object PhUser extends DefaultJsonProtocol with BaseModelFuncs {
   private val PhUserRegex = "(.*),(.*),(.*),(.*),(.*)".r
 
   def fromString(str: String): Option[PhUser] =  str match {
@@ -53,56 +55,13 @@ object PhUser extends DefaultJsonProtocol {
       })))
     case _ => None
   }
-  
-  implicit def js2string(x: Option[JsValue]):String = {
-    if (x.isDefined) {
-      x.get match {
-        case JsString(s) => s
-        case _ => null
-      }
-    }
-    else 
-      null
-  }
-
-  implicit def js2boolean(x: Option[JsValue]):Option[Boolean] = {
-    if (x.isDefined) {
-      x.get match {
-        case JsBoolean(s) => Some(s)
-        case _ => None
-      }
-    }
-    else
-      None
-  }
 
   def unapply(vtx: OrientVertex): Option[PhUser] = {
-    Some(
-      PhUser(
-        login = vtx.getProperty[String]("login"), 
-        password = "", 
-        email = vtx.getProperty[String]("email"),
-        firstName = vtx.getProperty[String]("firstName"),
-        secondName = vtx.getProperty[String]("secondName"),
-        activated = Some(vtx.getProperty[Boolean]("activated")),
-        manager = Some(vtx.getProperty[Boolean]("manager"))
-      )
-    )
+    Some(createFromVertex[PhUser](vtx)(0))
   }
 
   def unapply(obj: JsObject): Option[PhUser] = {
-    val fields = obj.fields
-    Some (
-      PhUser (
-        fields.get("login"),
-        fields.get("password"),
-        fields.get("email"),
-        fields.get("firstName"),
-        fields.get("secondName"),
-        fields.get("activated"),
-        fields.get("manager")
-      )
-    )
+    Some (createFromJson[PhUser](obj)(0))
   }
 
   private def getOrElse(value:String):String = {
@@ -111,21 +70,22 @@ object PhUser extends DefaultJsonProtocol {
 
   implicit object PhUserJsonFormat extends RootJsonFormat[PhUser] {
     override def write(obj: PhUser): JsValue = {
-      JsObject(
-        "login" -> JsString(obj.login),
-        "email" -> JsString(obj.email),
-        "password" -> JsString(""),
-        "firstName" -> JsString(getOrElse (obj.firstName)),
-        "secondName" -> JsString(getOrElse (obj.secondName)),
-        "activated" -> (obj.activated match {
-          case Some(b) => JsBoolean(b)
-          case None => JsNull
-        }),
-        "manager" -> (obj.manager match {
-          case Some(b) => JsBoolean(b)
-          case None => JsNull
-        })
-      )
+      JsObject(fields = obj)
+//      JsObject(
+//        "login" -> JsString(obj.login),
+//        "email" -> JsString(obj.email),
+//        "password" -> JsString(""),
+//        "firstName" -> JsString(getOrElse (obj.firstName)),
+//        "secondName" -> JsString(getOrElse (obj.secondName)),
+//        "activated" -> (obj.activated match {
+//          case Some(b) => JsBoolean(b)
+//          case None => JsNull
+//        }),
+//        "manager" -> (obj.manager match {
+//          case Some(b) => JsBoolean(b)
+//          case None => JsNull
+//        })
+//      )
     }
 
     override def read(json: JsValue): PhUser = {

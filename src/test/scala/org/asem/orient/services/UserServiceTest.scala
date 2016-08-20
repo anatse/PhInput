@@ -15,7 +15,7 @@ class UserServiceTest extends FlatSpec with Matchers {
     )
   }
 
-  var user:OrientVertex = null
+  var user:OrientVertex = _
   it should "be found in database " in {
     user = PhUserService.findUserByLogin("demo") match {
       case Some(user) => user

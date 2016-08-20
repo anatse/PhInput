@@ -31,7 +31,7 @@ Ext.define("PH.view.user.ListController", {
             record.set(values);
             grid.getStore().sync({
                 success: function(batch, opts) {
-                    win.close();
+                    win.hide();
                 },
                 failure: function (batch, opts) {
                     grid.getStore().load();

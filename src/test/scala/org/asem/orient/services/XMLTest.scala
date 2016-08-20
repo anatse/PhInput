@@ -22,7 +22,7 @@ class XMLTest extends FlatSpec with Matchers {
       } yield {
         <row>
           {for {prop <- row.keys} yield {
-            <attr name={prop} value={row.get(prop).getOrElse("")}/>
+            <attr name={prop} value={row.getOrElse(prop, "")}/>
         }}
         </row>
       }}
@@ -67,7 +67,7 @@ class XMLTest extends FlatSpec with Matchers {
   }
 
   it should "be unapplied from string" in {
-    val restoredUser = PhUser.fromString(user.toString).getOrElse(null)
+    val restoredUser = PhUser.fromString(user.toString).orNull
     restoredUser.toString should be (user.toString)
     restoredUser.pwdHash should be ("")
   }

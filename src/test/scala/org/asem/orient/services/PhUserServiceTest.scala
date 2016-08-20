@@ -2,13 +2,13 @@ package org.asem.orient.services
 
 import org.asem.orient.model._
 import org.scalatest._
+import spray.http.HttpHeaders._
+import spray.http.StatusCodes._
 import spray.http._
-import spray.routing._
-import spray.testkit._
-import HttpHeaders._
-import StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
+import spray.routing._
+import spray.testkit._
 
 class PhUserServiceTest extends FlatSpec 
                     with Matchers 

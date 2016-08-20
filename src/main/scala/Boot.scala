@@ -28,13 +28,13 @@ object Boot extends App {
     val context = SSLContext.getInstance("TLS")
 
     val keyStore: KeyStore = RSA.keyStore
-    val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-    keyManagerFactory.init(keyStore, RSA.getPassword.getPassword);
+    val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(keyStore, RSA.getPassword.getPassword)
 
-    val trustManagerFactory: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509");
-    trustManagerFactory.init(keyStore);
+    val trustManagerFactory: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+    trustManagerFactory.init(keyStore)
 
-    context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+    context.init(keyManagerFactory.getKeyManagers, trustManagerFactory.getTrustManagers, new SecureRandom())
     context
   }
 

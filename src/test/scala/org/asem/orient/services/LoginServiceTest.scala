@@ -1,11 +1,10 @@
 package org.asem.orient.services
 
 import org.scalatest._
+import spray.http.StatusCodes._
 import spray.http._
 import spray.routing._
 import spray.testkit._
-import spray.httpx.SprayJsonSupport._
-import StatusCodes._
 
 class LoginServiceTest extends FlatSpec 
                     with Matchers 

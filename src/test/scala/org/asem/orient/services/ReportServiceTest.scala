@@ -1,16 +1,16 @@
 package org.asem.orient.services
 
+import org.asem.orient.model.Report
 import org.joda.time.DateTime
 import org.scalatest._
+import spray.http.HttpHeaders._
+import spray.http.StatusCodes._
 import spray.http._
-import spray.routing._
-import spray.testkit._
-import HttpHeaders._
-import StatusCodes._
-import org.asem.orient.model.Report
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 import spray.json._
+import spray.routing._
+import spray.testkit._
 
 /**
   * Created by gosha-user on 13.08.2016.
@@ -45,20 +45,19 @@ class ReportServiceTest extends FlatSpec
   )
 
   "Report service" should "convert all fields of report object to map in runtime" in {
-    val map = ReportService.rep2Map(rep)
+    val map = Report.entity2Map(rep)
     map should not be empty
   }
 
-  var repSaved:Report = null
+  var repSaved:Report = _
   it should "create new report row" in {
     ReportService.createReport(rep.login, rep) match {
-      case Left(v) => {
+      case Left(v) =>
         v should not be null
         repSaved = v match {
           case x:Report => x
         }
-      }
-      case Right(s) => fail("error creating reopport " + s)
+      case Right(s) => fail("error creating report " + s)
     }
   }
 
@@ -93,7 +92,7 @@ class ReportServiceTest extends FlatSpec
     }
   }
 
-  var resp:JsValue = null
+  var resp:JsValue = _
   it should "create new report fro currently logged user" in {
     Post("/report", rep) ~> setTestCookie ("user_token", cookie) ~> sealRoute(reportRoute) ~> check {
       status should equal(Created)

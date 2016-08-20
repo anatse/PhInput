@@ -6,8 +6,8 @@ import org.asem.spray.security.RSA
 import spray.http.HttpForm
 import spray.httpx.unmarshalling._
 import spray.routing.AuthenticationFailedRejection.CredentialsMissing
+import spray.routing._
 import spray.routing.authentication._
-import spray.routing.{AuthenticationFailedRejection, RequestContext}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,7 +49,7 @@ class CookieAuthenticator {
     val userToken = ctx.request.cookies.find(_.name == "user_token")
     var ret: Option[UserData] = None
 
-    if (!userToken.isDefined) {
+    if (userToken.isEmpty) {
       val formd = ctx.request.as[HttpForm]
       if (formd.isRight) {
         val user:PhUser = formd.right.get.fields match {

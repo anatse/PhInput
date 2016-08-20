@@ -1,6 +1,6 @@
 package org.asem.orient.services
 
-import com.tinkerpop.blueprints.impls.orient.{OrientEdge, OrientGraph, OrientVertex}
+import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
 import org.joda.time.DateTime
 
 /**
@@ -65,17 +65,8 @@ trait BaseDB {
       tx.removeVertex(vtx)
       true
     } catch {
-      case e: Exception => {
+      case e: Exception =>
         false
-      }
-    }
-  }
-  
-  def ~>(vtxTo:OrientVertex): OrientVertex => String => OrientEdge = {
-    vtx => {
-      label => {
-        vtx.addEdge(label, vtxTo).asInstanceOf[OrientEdge]
-      }
     }
   }
 }

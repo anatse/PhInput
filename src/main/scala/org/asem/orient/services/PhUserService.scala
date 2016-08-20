@@ -1,16 +1,12 @@
 package org.asem.orient.services
 
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
-import org.asem.orient.{Database, Query}
-import org.asem.orient.model.CookieAuthenticator._
-import org.asem.orient.model.PhUser._
 import org.asem.orient.model.{PhUser, UserData}
+import org.asem.orient.{Database, Query}
 import spray.http.MediaTypes._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
-import spray.routing.{HttpService, _}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import spray.routing._
 
 /**
   * Created by gosha-user on 30.07.2016.
@@ -52,7 +48,7 @@ object PhUserService extends BaseDB {
   /**
     * Fucntion retrieves user vertex by user login
     * @param login user login
-    * @returnfound user vertex
+    * @return found user vertex
     */
   def findUserByLogin(login: String): Option[OrientVertex] = {
     Database.getTx(tx => {
@@ -67,11 +63,10 @@ object PhUserService extends BaseDB {
     Database.getTx(
       graph => {
         findVertexByAttr(graph, "PhUser", "login", login) match {
-          case Some(vtx: OrientVertex) => {
+          case Some(vtx: OrientVertex) =>
             vtx.setProperty("activated", true)
             vtx.save
             true
-          }
           case _ => false
         }
       }
@@ -88,24 +83,21 @@ object PhUserService extends BaseDB {
       Database.getTx(
         graph => {
           findVertexByAttr(graph, "PhUser", "login", user.login) match {
-            case Some(vtx: OrientVertex) => {
+            case Some(vtx: OrientVertex) =>
               if (user.pwdHash != null && !user.pwdHash.isEmpty) vtx.setProperty("password", user.pwdHash)
               if (user.email != null) vtx.setProperty("email", user.email)
               if (user.firstName != null) vtx.setProperty("firstName", user.firstName)
               if (user.secondName != null) vtx.setProperty("secondName", user.secondName)
-
-              if (user.manager.isDefined)
-                vtx.setProperty("manager", user.manager.get)
-
-              if (user.activated.isDefined)
+              if (user.manager.isDefined) vtx.setProperty("manager", user.manager.get)
+              if (user.activated.isDefined) {
                 vtx.setProperty("activated", user.activated.get)
+                println ("user activated: " + vtx.getProperty[Boolean]("activated"))
+              }
 
-              vtx.save
+              vtx.save()
               true
-            }
-            case _ => {
+            case _ =>
               false
-            }
           }
         }
       )
@@ -142,10 +134,9 @@ object PhUserService extends BaseDB {
     Database.getTx(
       graph => {
         findVertexByAttr(graph, "PhUser", "login", login) match {
-          case Some(vtx: OrientVertex) => {
+          case Some(vtx: OrientVertex) =>
             deleteUser (vtx)(tx = graph)
             true
-          }
           case _ => false
         }
       }
@@ -179,21 +170,17 @@ object PhUserService extends BaseDB {
   * <li>REST functions for update delete and retrieve user information</li>
   * </ul>
   */
-trait PhUserService extends HttpService {
+trait PhUserService extends BaseHttpService {
   private val registerRoute = post {
     path("user" / "register") {
        entity(as[PhUser]) {
-         newUser => {
+         newUser:PhUser => {
            if (newUser.email == null || newUser.email.isEmpty) {
-             respondWithStatus(StatusCodes.BadRequest) {
-               complete("{sucess: false, message: 'Email should be provided'}")
-             }
+             respondWithStatus(StatusCodes.BadRequest) { complete("{sucess: false, message: 'Email should be provided'}") }
            }
            else {
              PhUserService.createUser(newUser)
-             respondWithStatus(StatusCodes.Created) {
-               complete("{success: true, message: 'OK'}")
-             }
+             respondWithStatus(StatusCodes.Created) { complete("{success: true, message: 'OK'}") }
            }
          }
        }
@@ -201,90 +188,73 @@ trait PhUserService extends HttpService {
   }
 
   private val changeUserRoute = put {
-    authenticate(byCookie) {
+    auth {
+      user => path ("user" / Segment) {
+        login => entity(as[PhUser]) {
+          changePass => {
+            if (changePass.login != login) {
+              respondWithStatus(StatusCodes.BadRequest) { complete("Fail") }
+            }
+            else {
+              PhUserService.changeUser(changePass)
+              complete("{success: true, message: 'OK'}")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private def isManager (user:UserData, f: StandardRoute):RequestContext => Unit = {
+    if (user.manager) f
+    else respondWithStatus(StatusCodes.Forbidden) { complete { "{success: false, message: 'Forbidden " + user.login + " = " + user.manager + "'}" } }
+  }
+
+  private val deleteUserRoute = delete {
+    auth {
       user => {
         path ("user" / Segment) {
-          login => entity(as[PhUser]) {
-            changePass => {
-              if (changePass.login != login) {
-                respondWithStatus(StatusCodes.BadRequest) { complete ("Fail")}
+          login => isManager (user,
+            complete {
+              PhUserService.deleteUserByLogin(login)
+              "{success: true, message: 'OK'}"
+            }
+          )
+        }
+      }
+    }
+  }
+
+  private val getUserByLoginRoute = get {
+    auth {
+      user => path ("user" / Segment) {
+        login => respondWithMediaType(`application/json`) {
+          isManager (user, complete {
+              val vtx = PhUserService.findUserByLogin(login)
+              if (vtx.isDefined) {
+                val PhUser(user) = vtx.get
+                user
               }
               else {
-                PhUserService.changeUser(changePass)
-                complete("{success: true, message: 'OK'}")
+                "{success: false, message: 'no data'}"
               }
             }
-          }
+          )
         }
       }
     }
   }
-  
-  private def isManager (user:UserData, f: StandardRoute):RequestContext => Unit = {
-    if (user.manager) {
-      f
-    }
-    else {
-      respondWithStatus(StatusCodes.Forbidden) {
-        complete {
-          "{success: false, message: 'Forbidden " + user.login + " = " + user.manager + "'}"
-        }
-      }
-    }
-  }
-  
-  private val deleteUserRoute = delete {
-    authenticate(byCookie) {
-      user => {
-        path ("user" / Segment) {
-          login => {
-            isManager (user, 
-              complete {
-                PhUserService.deleteUserByLogin(login)
-                "{success: true, message: 'OK'}"
-              }
-            )
-          }
-        }
-      }
-    }
-  }
-  
-  private val getUserByLoginRoute = get {
-    authenticate(byCookie) {
-      user => {
-        path ("user" / Segment) {
-          login => {
-            respondWithMediaType(`application/json`) {
-              isManager (user, 
-                complete {
-                  val vtx = PhUserService.findUserByLogin(login)
-                  if (vtx.isDefined) {
-                    val PhUser(user) = vtx.get
-                    user
-                  }
-                  else {
-                    "{success: false, message: 'no data'}"
-                  }
-                }
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-  
+
   private val userListRoute = get {
     path ("user") {
       respondWithMediaType(`application/json`) {
         complete {
-          val users = PhUserService.findAllUsers;
+          val users = PhUserService.findAllUsers()
           users.toArray[PhUser]
         }
       }
     }
   }
 
-  val userManagementRoute = registerRoute ~ changeUserRoute ~ deleteUserRoute ~ getUserByLoginRoute ~ userListRoute
+  val userManagementRoute = registerRoute  ~ changeUserRoute ~ deleteUserRoute ~ getUserByLoginRoute ~ userListRoute
 }
