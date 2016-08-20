@@ -2,12 +2,16 @@ package org.asem.orient.model
 
 import java.util.Date
 
+import scala.language.postfixOps
+import scala.language.implicitConversions
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import spray.json.{JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue}
+import spray.json.{JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
 import scala.reflect.ClassTag
+import scala.reflect.runtime._
+import scala.reflect.runtime.universe._
 
 /**
   * Created by gosha-user on 20.08.2016.
@@ -52,14 +56,15 @@ trait BaseModelFuncs {
       value = instanceMirror.reflectMethod(acc).apply()
       if value != null
     } yield {
-      acc.name.toString -> (value match {
-        case s:String => JsString(s)
-        case d:DateTime => JsString(dateFormatter.print(d))
-        case i:Int => JsNumber(i)
-        case b:Boolean => JsBoolean(b)
-        case b:Some[Boolean] => JsBoolean(b.get)
-        case None => JsNull
-      })
+      acc.name.toString -> (
+        value match {
+          case s:String => JsString(s)
+          case d:DateTime => JsString(dateFormatter.print(d))
+          case i:Int => JsNumber(i)
+          case b:Boolean => JsBoolean(b)
+          case Some(b:Boolean) => JsBoolean(b)
+          case None => JsNull
+        })
     }
 
     seq.toMap
@@ -115,8 +120,6 @@ trait BaseModelFuncs {
     }
   }
 
-  import scala.reflect.runtime._
-  import scala.reflect.runtime.universe._
   def createFromVertex[T : TypeTag](vtx: OrientVertex)(ctor: Int = 0): T = {
     val tt = typeTag[T]
     val ctr:MethodMirror = currentMirror.reflectClass(tt.tpe.typeSymbol.asClass).reflectConstructor (

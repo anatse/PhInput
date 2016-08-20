@@ -6,12 +6,12 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
-scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
+scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-feature")
 
 //SelectMainClass = "Boot.scala"
 
 libraryDependencies ++= {
-  val akkaV = "2.4.8"
+  val akkaV = "2.4.9"
   val sprayV = "1.3.3"
   Seq(
     "io.spray" %% "spray-can" % sprayV,
@@ -24,17 +24,17 @@ libraryDependencies ++= {
     "org.scala-lang" % "scala-reflect" % "2.11.8",
 
     // Orient DB dependencies
-    "com.orientechnologies" % "orientdb-core" % "2.2.4",
-    "com.orientechnologies" % "orientdb-client" % "2.2.4",
-    "com.orientechnologies" % "orientdb-jdbc" % "2.2.4",
-    "com.orientechnologies" % "orientdb-graphdb" % "2.2.4",
-    "com.orientechnologies" % "orientdb-distributed" % "2.2.4",
+    "com.orientechnologies" % "orientdb-core" % "2.2.7",
+    "com.orientechnologies" % "orientdb-client" % "2.2.7",
+    "com.orientechnologies" % "orientdb-jdbc" % "2.2.7",
+    "com.orientechnologies" % "orientdb-graphdb" % "2.2.7",
+    "com.orientechnologies" % "orientdb-distributed" % "2.2.7",
     "com.tinkerpop.blueprints" % "blueprints-core" % "2.6.0",
     "com.github.nscala-time" %% "nscala-time" % "2.12.0",
 
     "io.spray" %% "spray-testkit" % sprayV % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaV % "test",
-    "org.scalatest" % "scalatest_2.11" % "2.2.6" % "test"
+    "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
   )
 }
 

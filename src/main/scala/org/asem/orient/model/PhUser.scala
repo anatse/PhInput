@@ -56,42 +56,12 @@ object PhUser extends DefaultJsonProtocol with BaseModelFuncs {
     case _ => None
   }
 
-  def unapply(vtx: OrientVertex): Option[PhUser] = {
-    Some(createFromVertex[PhUser](vtx)(0))
-  }
-
-  def unapply(obj: JsObject): Option[PhUser] = {
-    Some (createFromJson[PhUser](obj)(0))
-  }
-
-  private def getOrElse(value:String):String = {
-    if (value == null) "" else value
-  }
+  def unapply(vtx: OrientVertex): Option[PhUser] = Some(createFromVertex[PhUser](vtx)(0))
+  def unapply(obj: JsObject): Option[PhUser] = Some (createFromJson[PhUser](obj)(0))
 
   implicit object PhUserJsonFormat extends RootJsonFormat[PhUser] {
-    override def write(obj: PhUser): JsValue = {
-      JsObject(fields = obj)
-//      JsObject(
-//        "login" -> JsString(obj.login),
-//        "email" -> JsString(obj.email),
-//        "password" -> JsString(""),
-//        "firstName" -> JsString(getOrElse (obj.firstName)),
-//        "secondName" -> JsString(getOrElse (obj.secondName)),
-//        "activated" -> (obj.activated match {
-//          case Some(b) => JsBoolean(b)
-//          case None => JsNull
-//        }),
-//        "manager" -> (obj.manager match {
-//          case Some(b) => JsBoolean(b)
-//          case None => JsNull
-//        })
-//      )
-    }
-
-    override def read(json: JsValue): PhUser = {
-      val PhUser(user) = json.asJsObject
-      user
-    }
+    override def write(obj: PhUser): JsValue = JsObject(fields = obj)
+    override def read(json: JsValue): PhUser = createFromJson[PhUser](json.asJsObject)(0)
   }
 }
 

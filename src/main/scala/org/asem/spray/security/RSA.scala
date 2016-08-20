@@ -11,7 +11,7 @@ import spray.caching._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-
+import scala.language.postfixOps
 /**
   * Created by gosha-user on 30.07.2016.
   */

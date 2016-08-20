@@ -49,22 +49,11 @@ case class Report (
   * </ul>
   */
 object Report extends DefaultJsonProtocol with BaseModelFuncs {
-  def unapply(vtx: OrientVertex): Option[Report] = {
-    Some(createFromVertex[Report](vtx)(0))
-  }
+  def unapply(vtx: OrientVertex): Option[Report] = Some(createFromVertex[Report](vtx)(0))
+  def unapply(obj: JsObject): Option[Report] = Some (createFromJson[Report](obj)(0))
 
-  def unapply(obj: JsObject): Option[Report] = {
-    Some (createFromJson[Report](obj)(0))
-  }
-
-  implicit object PhUserJsonFormat extends RootJsonFormat[Report] {
-    override def write(obj: Report): JsValue = {
-      JsObject(fields = obj)
-    }
-
-    override def read(json: JsValue): Report = {
-      val Report(report) = json.asJsObject
-      report
-    }
+  implicit object ReportJsonFormat extends RootJsonFormat[Report] {
+    override def write(obj: Report): JsValue = JsObject(fields = obj)
+    override def read(json: JsValue): Report = createFromJson[Report](json.asJsObject)(0)
   }
 }
