@@ -12,7 +12,7 @@ import scala.language.implicitConversions
   * Class represents user for pharmacy input system
   * Created by gosha-user on 30.07.2016.
   */
-case class PhUser(login: String, password: String, email: String = "", firstName: String = "", secondName: String = "", activated: Option[Boolean] = None, manager: Option[Boolean] = None) {
+case class PhUser(login: String, password: String, email: String = "", firstName: String = "", secondName: String = "", activated: Option[Boolean] = None, manager: Option[Boolean] = None, id:String = "") {
   require(login != null, "login should be provided")
 //  require(password != null, "password should be provided")
 //  require(email != null, "email should be provided")

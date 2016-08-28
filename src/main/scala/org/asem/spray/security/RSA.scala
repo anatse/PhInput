@@ -12,6 +12,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
+
+
 /**
   * Created by gosha-user on 30.07.2016.
   */
@@ -39,7 +41,7 @@ object RSA {
   private val cacheKeys:Cache[String] = new ExpiringLruCache[String](10000, 0, 30 minutes, 10 minutes)
 
   def isInitialized:Boolean = {
-    pkEntry.getPrivateKey != null
+    pkEntry.getPrivateKey() != null
   }
 
   def encrypt (data:String):String = {

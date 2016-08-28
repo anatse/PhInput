@@ -1,8 +1,8 @@
-package org.asem.orient.model
+package org.asem.spray.security
 
 import com.typesafe.config.ConfigFactory
 import org.asem.orient.Query
-import org.asem.spray.security.RSA
+import org.asem.orient.model.PhUser
 import spray.http.HttpForm
 import spray.httpx.unmarshalling._
 import spray.routing.AuthenticationFailedRejection.CredentialsMissing

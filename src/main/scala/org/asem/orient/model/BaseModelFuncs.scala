@@ -2,13 +2,12 @@ package org.asem.orient.model
 
 import java.util.Date
 
-import scala.language.postfixOps
-import scala.language.implicitConversions
-import com.tinkerpop.blueprints.impls.orient.OrientVertex
+import com.tinkerpop.blueprints.Vertex
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import spray.json.{JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json._
 
+import scala.language.{implicitConversions, postfixOps}
 import scala.reflect.ClassTag
 import scala.reflect.runtime._
 import scala.reflect.runtime.universe._
@@ -43,8 +42,6 @@ trait BaseModelFuncs {
     * @return generated json map
     */
   implicit def entity2JsonMap[T : ClassTag](rep: T):Map[String, JsValue] = {
-    import scala.reflect.runtime.universe._
-
     val rm = scala.reflect.runtime.currentMirror
     val accessors = rm.classSymbol(rep.getClass).toType.members.collect {
       case m: MethodSymbol if m.isGetter && m.isPublic => m
@@ -120,7 +117,7 @@ trait BaseModelFuncs {
     }
   }
 
-  def createFromVertex[T : TypeTag](vtx: OrientVertex)(ctor: Int = 0): T = {
+  def createFromVertex[T : TypeTag](vtx: Vertex)(ctor: Int = 0): T = {
     val tt = typeTag[T]
     val ctr:MethodMirror = currentMirror.reflectClass(tt.tpe.typeSymbol.asClass).reflectConstructor (
       tt.tpe.members.filter(m => m.isMethod && m.asMethod.isConstructor).iterator.toSeq(ctor).asMethod
@@ -140,7 +137,7 @@ trait BaseModelFuncs {
         case "BingInt" => vtx.getProperty[Int](param.name.toString)
         case "BigDecimal" => vtx.getProperty[Double](param.name.toString)
         case "Boolean" => vtx.getProperty[Boolean](param.name.toString)
-        case "Option[Boolean]" => if (vtx.getProperty[Boolean](param.name.toString) != null) Some(vtx.getProperty[Boolean](param.name.toString)) else None
+        case "Option[Boolean]" => if (vtx.getPropertyKeys.contains(param.name.toString)) Some(vtx.getProperty[Boolean](param.name.toString)) else None
         case _ => vtx.getProperty[String](param.name.toString)
       }
     }

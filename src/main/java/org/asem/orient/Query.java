@@ -2,6 +2,7 @@ package org.asem.orient;
 
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import com.tinkerpop.blueprints.impls.orient.OrientDynaElementIterable;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 
 import java.io.IOException;
@@ -37,5 +38,17 @@ public class Query {
         }
 
         return EMPTY_LIST;
+    }
+    
+    public static List<OrientVertex> executeQuery (OrientGraph graph, String sQuery, Map params) {
+        OSQLSynchQuery query = new OSQLSynchQuery(sQuery);
+        OrientDynaElementIterable result = graph.command(query).execute(params);
+        final List<OrientVertex> res = new LinkedList();
+        result.forEach(obj -> {
+            OrientVertex vtx = (OrientVertex) obj;
+            res.add(vtx);
+        });
+
+        return res;
     }
 }

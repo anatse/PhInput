@@ -14,27 +14,35 @@ object Database {
   lazy val pool = {
     new OrientGraphFactory (config.getString("database.url"), config.getString("database.user"), config.getString("database.password")).setupPool(1, 10)
   }
-
+  
+  def pushMessageToClients (msg:Any) = {
+    import org.asem.Boot._
+    service ! msg
+  }
+  
   def queryToXml (query: String, params:Map[String, Any]) = {
-    val result = Query.executeQuery(query, params)
-    <data>
-      {
-        for {
-          row <- result
-        } yield {
-          <row>
+    getTx (
+      tx => {
+        val result = Query.executeQuery(tx, query, params)
+          <data>
             {
-              for { prop <- row.getPropertyKeys } yield {
-                <attr name={prop}>{row.getProperty(prop)}</attr>
+              for {
+                row <- result
+              } yield {
+                <row>
+                  {
+                    for { prop <- row.getPropertyKeys } yield {
+                      <attr name={prop}>{row.getProperty(prop)}</attr>
+                    }
+                  }
+                </row>
               }
             }
-          </row>
-        }
-      }
-    </data>
+          </data>
+      })
   }
 
-  def queryToXml (tag:String,query: String, params:Map[String, Any]) = {
+  def queryToXml (tag:String, query: String, params:Map[String, Any]) = {
     val result = Query.executeQuery(query, params)
     val r = <data>
     {
@@ -43,9 +51,10 @@ object Database {
       } yield {
         <row>
           {
-          for { prop <- row.getPropertyKeys } yield {
-            <attr name={prop}>{row.getProperty(prop)}</attr>
-          }
+          for { prop <- row.getPropertyKeys } 
+            yield {
+              <attr name={prop}>{row.getProperty(prop)}</attr>
+            }
           }
         </row>
       }

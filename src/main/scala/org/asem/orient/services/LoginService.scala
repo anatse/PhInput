@@ -1,7 +1,7 @@
 package org.asem.orient.services
 
 import com.typesafe.config.ConfigFactory
-import org.asem.orient.model.CookieAuthenticator._
+import org.asem.spray.security.CookieAuthenticator._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

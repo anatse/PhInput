@@ -1,10 +1,11 @@
 package org.asem.orient.services
 
-import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
+import com.tinkerpop.blueprints.impls.orient.{OrientEdge, OrientGraph, OrientVertex}
 import org.joda.time.DateTime
 
 /**
  * Created by gosha-user on 30.07.2016.
+ * @see http://orientdb.com/docs/last/Roadmap.html
  */
 trait BaseDB {
   def addVertex(clazz: String, params: Map[String, Any]): OrientGraph => OrientVertex = {
@@ -65,8 +66,17 @@ trait BaseDB {
       tx.removeVertex(vtx)
       true
     } catch {
-      case e: Exception =>
+      case e: Exception => {
         false
+      }
+    }
+  }
+  
+  def ~>(vtxTo:OrientVertex): OrientVertex => String => OrientEdge = {
+    vtx => {
+      label => {
+        vtx.addEdge(label, vtxTo).asInstanceOf[OrientEdge]
+      }
     }
   }
 }

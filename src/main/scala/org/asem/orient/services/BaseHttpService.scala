@@ -1,7 +1,7 @@
 package org.asem.orient.services
 
-import org.asem.orient.model.CookieAuthenticator._
-import org.asem.orient.model.UserData
+import org.asem.spray.security.CookieAuthenticator._
+import org.asem.spray.security.UserData
 import spray.http._
 import spray.routing._
 

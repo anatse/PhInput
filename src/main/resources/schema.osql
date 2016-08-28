@@ -8,9 +8,16 @@ DROP CLASS PharmNet;
 DROP CLASS CodeWithName;
 DROP CLASS Address;
 DROP CLASS Pharmacy;
-DROP CLASS Worker;
 DROP CLASS Manager;
 DROP CLASS Employee;
+DROP CLASS Owner;
+DROP CLASS Worker;
+DROP CLASS Report;
+DROP CLASS Drug;
+DROP CLASS PhNet;
+DROP CLASS ReportWorker;
+DROP CLASS Task;
+DROP CLASS Comment;
 
 CREATE CLASS PhUser EXTENDS V;
 CREATE PROPERTY PhUser.login STRING;
@@ -45,11 +52,18 @@ ALTER PROPERTY VisitReq.type regexp "[PH|DR]";
 ALTER PROPERTY VisitReq.num MANDATORY TRUE;
 ALTER PROPERTY VisitReq.type MANDATORY TRUE;
 
+create class Drug;
+create property Drug.name String;
+create property Drug.existence Boolean;
+create property Drug.price Decimal;
+
 create class PrjCycle extends v;
 create property PrjCycle.name string;
 create property PrjCycle.startDate date;
 create property PrjCycle.endDate date;
 create property PrjCycle.visits embeddedlist VisitReq;
+create property PrjCycle.drugs embeddedlist Drug;
+
 ALTER PROPERTY PrjCycle.name MANDATORY TRUE;
 ALTER PROPERTY PrjCycle.startDate MANDATORY TRUE;
 ALTER PROPERTY PrjCycle.endDate MANDATORY TRUE;
@@ -57,32 +71,34 @@ ALTER PROPERTY PrjCycle.visits MANDATORY TRUE;
 
 CREATE CLASS PharmNet EXTENDS V;
 CREATE PROPERTY PharmNet.name STRING;
+CREATE PROPERTY PharmNet.contract STRING;
 ALTER PROPERTY PharmNet.name MANDATORY TRUE;
 CREATE INDEX UxPharmNet ON PharmNet(name) UNIQUE;
 
-create class CodeWithName;
-create property CodeWithName.code string;
-create property CodeWithName.name string;
-alter property CodeWithName.code mandatory true;
-alter property CodeWithName.name mandatory true;
-
-create class Address;
-create property Address.city embedded CodeWithName;
-create property Address.street embedded CodeWithName;
-create property Address.building embedded CodeWithName;
-alter property Address.city mandatory true;
-alter property Address.street mandatory true;
-alter property Address.building mandatory true;
-
 CREATE CLASS Pharmacy EXTENDS V;
 CREATE PROPERTY Pharmacy.name STRING;
-CREATE PROPERTY Pharmacy.address embedded Address;
 CREATE PROPERTY Pharmacy.chiefPhone STRING;
+CREATE PROPERTY Pharmacy.chiefName STRING;
+CREATE PROPERTY Pharmacy.tradeRoomPhone STRING;
+create property Pharmacy.cityName String;
+create property Pharmacy.streetName String;
+create property Pharmacy.buildingName String;
+create property Pharmacy.cityCode String;
+create property Pharmacy.streetCode String;
+create property Pharmacy.buildingCode String;
 
 ALTER PROPERTY Pharmacy.name MANDATORY TRUE;
-ALTER PROPERTY Pharmacy.address MANDATORY TRUE;
+alter property Pharmacy.cityName mandatory true;
+alter property Pharmacy.streetName mandatory true;
+alter property Pharmacy.buildingName mandatory true;
 
-CREATE INDEX UxPharmacy ON Pharmacy(name, address) UNIQUE;
+CREATE INDEX UxPharmacyAddress ON Pharmacy(cityName, streetName, buildingName) UNIQUE;
+
+CREATE CLASS PhNet EXTENDS E;
+CREATE PROPERTY PhNet.out LINK Pharmacy;
+CREATE PROPERTY PhNet.in LINK PharmNet;
+ALTER PROPERTY PhNet.out MANDATORY TRUE;
+ALTER PROPERTY PhNet.in MANDATORY TRUE;
 
 CREATE CLASS Worker EXTENDS E;
 CREATE PROPERTY Worker.out LINK PhUser;
@@ -97,10 +113,43 @@ CREATE CLASS Employee EXTENDS Worker;
 CREATE CLASS Owner EXTENDS Worker;
 
 CREATE CLASS Report EXTENDS V;
-create property Report.city String;
-create property Report.street string;
-create property Report.building string;
-alter property Report.city mandatory true;
-alter property Report.street mandatory true;
-alter property Report.building mandatory true;
-CREATE INDEX UxReportAddress ON Report(city,street,building) UNIQUE;
+create property Report.createDate Date;
+create property Report.drugs embeddedlist Drug;
+
+CREATE CLASS ReportWorker EXTENDS E;
+CREATE PROPERTY ReportWorker.in LINK PhUser;
+CREATE PROPERTY ReportWorker.ouy LINK Report;
+CREATE INDEX UxReportWorker ON ReportWorker(out,in) UNIQUE;
+
+CREATE CLASS ReportChecker EXTENDS E;
+CREATE PROPERTY ReportChecker.in LINK PhUser;
+CREATE PROPERTY ReportChecker.out LINK Report;
+CREATE INDEX UxReportChecker ON ReportChecker(out,in) UNIQUE;
+
+CREATE CLASS ReportCycle EXTENDS E;
+CREATE PROPERTY ReportCycle.in LINK PrjCycle;
+CREATE PROPERTY ReportCycle.out LINK Report;
+CREATE INDEX UxReportCycle ON ReportCycle(out,in) UNIQUE;
+
+CREATE CLASS ReportPharm EXTENDS E;
+CREATE PROPERTY ReportPharm.in LINK Pharmacy;
+CREATE PROPERTY ReportPharm.out LINK Report;
+CREATE INDEX UxReportPharm ON ReportPharm(out,in) UNIQUE;
+
+CREATE CLASS Comment EXTENDS V;
+CREATE PROPERTY Comment.owner String;
+CREATE PROPERTY Comment.comment String;
+CREATE PROPERTY Comment.createDate Date;
+
+CREATE CLASS Task EXTENDS V;
+CREATE PROPERTY Task.name String;
+CREATE PROPERTY Task.content String;
+CREATE PROPERTY Task.status String;
+CREATE PROPERTY Task.assignedPerson String;
+CREATE PROPERTY Task.changeDate DateTime;
+CREATE PROPERTY Task.deadLine DateTime;
+CREATE PROPERTY Task.owner String;
+
+insert into PrjCycle(name, visits, startDate, endDate) values ('Цикл-1', [{"@type" : "d", "@class": "VisitReq", "type":"P","num":20}], '2016-07-31', '2016-09-03')
+insert into Pharmacy(name, cityName, streetName, buildingName) values ("Аптека 36.6", 'Москва', 'Новоданиловская', '10')
+drugs- {"@type":"d","@class":"Drug","name":"Analgin","existence":true,"price":99.99}

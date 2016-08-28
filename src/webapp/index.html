@@ -21,6 +21,35 @@
     <link rel="stylesheet" type="text/css" href="list-view.css" />
   </head>
   <body>
+    <script>
+        var socket = new WebSocket("ws://javascript.ru/ws");
+
+        console.log (socket);
+
+socket.onopen = function() {
+  alert("Соединение установлено.");
+};
+
+socket.onclose = function(event) {
+  if (event.wasClean) {
+    alert('Соединение закрыто чисто');
+  } else {
+    alert('Обрыв соединения'); // например, "убит" процесс сервера
+  }
+  alert('Код: ' + event.code + ' причина: ' + event.reason);
+};
+
+socket.onmessage = function(event) {
+  alert("Получены данные " + event.data);
+};
+
+socket.onerror = function(error) {
+  alert("Ошибка " + error.message);
+};
+
+socket.send("Привет");
+    </script>
+
     <h1>ListView Example</h1>
 
     <form action="/upload" method="post" enctype="multipart/form-data">

@@ -1,8 +1,9 @@
 package org.asem.orient.services
 
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
-import org.asem.orient.model.{PhUser, UserData}
+import org.asem.orient.model.PhUser
 import org.asem.orient.{Database, Query}
+import org.asem.spray.security.UserData
 import spray.http.MediaTypes._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
