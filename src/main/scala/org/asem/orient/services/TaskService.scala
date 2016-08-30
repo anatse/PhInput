@@ -58,6 +58,26 @@ object TaskService extends BaseDB {
       }
     )
   }
+
+  def deleteTask (taskId: String):Either[String, String] = {
+    Database.getTx(
+      graph => {
+        try {
+          graph.getVertex("#" + taskId) match {
+            case vtx: OrientVertex => {
+              graph.removeVertex(vtx)
+              graph.commit()
+              Left("DELETE SUCCESSFULL")
+            }
+            case _ => Right("Error deleting record: " + "#" + taskId)
+          }
+        }
+        catch {
+          case e:Exception => Right(e.toString)
+        }
+      }
+    )
+  }
   
   def addComment (taskId:String, comment:Comment) = {
     Database.getTx(
@@ -111,7 +131,10 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
     auth {
       user => path("task" / Segment) {
         reportId => {
-          complete {"Nope"}
+          TaskService.deleteTask(reportId) match {
+            case Left(rep) => respondWithStatus(StatusCodes.OK   ) { complete (rep)}
+            case Right(s) => respondWithStatus(StatusCodes.InternalServerError) { complete (s) }
+          }
         }
       }
     }
