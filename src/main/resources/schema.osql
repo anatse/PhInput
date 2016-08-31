@@ -16,6 +16,9 @@ DROP CLASS Report;
 DROP CLASS Drug;
 DROP CLASS PhNet;
 DROP CLASS ReportWorker;
+DROP CLASS ReportChecker;
+DROP CLASS ReportCycle;
+DROP CLASS ReportPharm;
 DROP CLASS Task;
 DROP CLASS Comment;
 
@@ -118,7 +121,7 @@ create property Report.drugs embeddedlist Drug;
 
 CREATE CLASS ReportWorker EXTENDS E;
 CREATE PROPERTY ReportWorker.in LINK PhUser;
-CREATE PROPERTY ReportWorker.ouy LINK Report;
+CREATE PROPERTY ReportWorker.out LINK Report;
 CREATE INDEX UxReportWorker ON ReportWorker(out,in) UNIQUE;
 
 CREATE CLASS ReportChecker EXTENDS E;
@@ -149,7 +152,3 @@ CREATE PROPERTY Task.assignedPerson String;
 CREATE PROPERTY Task.changeDate DateTime;
 CREATE PROPERTY Task.deadLine DateTime;
 CREATE PROPERTY Task.owner String;
-
-insert into PrjCycle(name, visits, startDate, endDate) values ('Цикл-1', [{"@type" : "d", "@class": "VisitReq", "type":"P","num":20}], '2016-07-31', '2016-09-03')
-insert into Pharmacy(name, cityName, streetName, buildingName) values ("Аптека 36.6", 'Москва', 'Новоданиловская', '10')
-drugs- {"@type":"d","@class":"Drug","name":"Analgin","existence":true,"price":99.99}

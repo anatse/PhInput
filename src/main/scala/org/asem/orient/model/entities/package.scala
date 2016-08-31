@@ -32,6 +32,7 @@ package object entities {
       val id:String = vtx.getId.toString.replace("#", "")
       def prop[B](name: String) = vtx.getProperty[B](name)
       def field[T](name: String)(implicit m:Manifest[T]):T = vtx.asInstanceOf[OrientVertex].getRecord[ODocument].field(name, m.runtimeClass)
+      def asDoc = vtx.asInstanceOf[OrientVertex].getRecord[ODocument]
       def out(label: String):Vertex = {
         val vtxs = vtx.getVertices(OUT, label)
         if (vtxs.iterator().hasNext)
@@ -144,12 +145,14 @@ package object entities {
   }
 
   case class Drug(name: String, existence:Boolean, price: BigDecimal)
-  case class Report(id: String = null, cycle: PrjCycle, owner: PrjUser, pharmacy: Pharmacy, drugs: Iterable[Drug], checked: Boolean = false, checker: PrjUser) extends BaseEntity
+  case class Report(id: String = null, createDate:DateTime, cycle: PrjCycle, owner: PrjUser, pharmacy: Pharmacy, drugs: Iterable[Drug], checked: Boolean = false, checker: PrjUser) extends BaseEntity
   object Report extends JsonMapper[Report] {
+    import java.math.{BigDecimal => JavaDecimal}
     def unapply(project: String): Option[Report] = Some(read(project))
     def unapply[B <: Vertex](vtx: B): Option[Report] = {
       val rep = Report(
         id = vtx.id,
+        createDate = vtx.prop[Date]("createDate"),
         cycle = PrjCycle.unapply(vtx.out("ReportCycle")).getOrElse(null),
         owner = PrjUser.unapply(vtx.in("ReportWorker")).getOrElse(null),
         pharmacy = Pharmacy.unapply(vtx.out("ReportPharm")).getOrElse(null),
@@ -158,20 +161,24 @@ package object entities {
       )
 
       val drugsList: OTrackedList[ODocument] = vtx.field("drugs")
-      val drugs = for {drugRec <- drugsList} yield {
-        Drug(
-          name = drugRec.field("name", classOf[String]),
-          existence = drugRec.field("existence", classOf[Boolean]),
-          price = drugRec.field[BigDecimal]("price", classOf[BigDecimal])
-        )
-      }
+      if (drugsList != null) {
+        val drugs = for {drugRec <- drugsList} yield {
+          Drug(
+            name = drugRec.field("name", classOf[String]),
+            existence = drugRec.field("existence", classOf[Boolean]),
+            price = drugRec.field[JavaDecimal]("price", classOf[JavaDecimal])
+          )
+        }
 
-      Some(rep.copy(drugs = drugs))
+        Some(rep.copy(drugs = drugs))
+      }
+      else 
+        Some (rep)
     }
   }
 
   object PrjService {
-    import java.util.{Map => JavaMap}
+    import java.util.{Map => JavaMap, List => JavaList}
     val ID_PATTERN = "([0-9]+:[0-9]+)".r
 
     /**
@@ -179,9 +186,18 @@ package object entities {
       * @param id identifier to check
       * @return identifier if suitable or throw an error
       */
-    def checkId (id:String):String = id match {
+    private def checkId (id:String):String = id match {
       case ID_PATTERN(c) => c
       case _ => throw new IllegalArgumentException ("Wrong id is provided: " + id)
+    }
+    
+    private def findVertexByAttrs(tx: OrientGraph, clazz: String, attrNames:Array[String], attrValues:Array[Object]): Option[Vertex] = {
+      val vtxs = tx.getVertices(clazz, attrNames, attrValues)
+      if (vtxs.iterator.hasNext) {
+        Some(vtxs.iterator.next.asInstanceOf[Vertex])
+      }
+      else
+        None
     }
 
     /**
@@ -243,7 +259,6 @@ package object entities {
       val SQL_QUERY = "select expand(in('ReportCycle')) from :cycleId where in('ReportCycle').in('ReportWorker') in [:userId]"
       val params = Map("cycleId" -> new ORecordId("#" + cycle.id), "userId" -> new ORecordId("#" + user.id))
       val vtxs = Query.executeQuery(tx, SQL_QUERY, params)
-      println ("vtxs: " + vtxs + ", " + SQL_QUERY)
       for (vtxRep <- vtxs) yield {
         val Report (rep) = vtxRep; rep
       }
@@ -254,28 +269,121 @@ package object entities {
       * @param prj project
       * @return created project
       */
-    def addProject(prj:Project):OrientGraph => Project = {
+    def addProject(prj:Project, user:PrjUser):OrientGraph => Project = {
       tx => {
         val map:JavaMap[String, Object] = Map("name" -> prj.name, "startDate" -> prj.startDate.toDate)
         val vtx = tx.addVertex("class:Project", map)
-        vtx.save()
+        findVertexByAttrs(tx, "PhUser", Array("login"), Array(user.login)) match {
+          case Some(uVtx) => uVtx.addEdge ("Manager", vtx)
+          case  _ => throw new IllegalArgumentException("owner not found: " + user.login)
+        }
+        
         val Project(p) = vtx
         p
       }
     }
 
     /**
-      * Fucntion add new cycle to project
+      * Fucntion add new cycle to project. Also with required visits
       * @param cycle project cycle
       * @return created project cycle
       */
-    def addPrjCycle (cycle: PrjCycle): OrientGraph => PrjCycle = {
+    def addPrjCycle (cycle: PrjCycle, prjId:String): OrientGraph => PrjCycle = {
       tx => {
-        val map:java.util.Map[String, Object] = Map("name" -> cycle.name,"startDate" -> cycle.startDate.toDate,"endDate" -> cycle.endDate.toDate)
-        val vtx = tx.addVertex("class:Project", map)
-        vtx.save()
+        val prjVtx = tx.getVertex ("#" + prjId)
+        if (prjVtx == null)
+          throw new IllegalArgumentException (s"project {prjId} not found")
+
+        val map:JavaMap[String, Object] = Map("name" -> cycle.name,"startDate" -> cycle.startDate.toDate,"endDate" -> cycle.endDate.toDate)
+        val vtx = tx.addVertex("class:PrjCycle", map)
+        val doc = vtx.asDoc
+        
+        val visitList:JavaList[ODocument] = {for {visit <- cycle.visits} yield {new ODocument("VisitReq").field("num", visit.num).field("type", visit.typeName)}}.toList
+        doc.field ("visits", visitList)
+
+        // Add edge
+        prjVtx.addEdge ("E", vtx)
         val PrjCycle(p) = vtx
         p
+      }
+    }
+    
+    def addDrugsToReport (vtx:Vertex, drugs:Iterable[Drug]):Unit = {
+      val drugList:JavaList[ODocument] = drugs.map(
+        drug => new ODocument("Drug").field("name", drug.name).field("existence", drug.existence).field("price", drug.price)
+      ).toList
+      vtx.asDoc.field ("drugs", drugList)
+    }
+    
+    protected def findOrAddPharmacy (pharm:Pharmacy)(implicit tx:OrientGraph):Vertex = {
+      findVertexByAttrs(tx, "Pharmacy", Array("cityName", "streetName", "buildingName"), Array(pharm.cityName, pharm.streetName, pharm.buildingName)) match {
+        case Some(vtx: OrientVertex) => vtx
+        case _ => addPharmacy(pharm)
+      }
+    }
+    
+    protected def findOrAddPharmNet (pharmNet:PharmNet)(implicit tx:OrientGraph):Vertex = {
+      findVertexByAttrs(tx, "PharmNet", Array("name"), Array(pharmNet.name)) match {
+        case Some(vtx: OrientVertex) => vtx
+        case _ => addPharmNet(pharmNet)
+      }
+    }
+
+    protected def addPharmNet (pharmNet:PharmNet)(implicit tx:OrientGraph):Vertex = {
+      val map:JavaMap[String, Object] = Map("name" -> pharmNet.name, "contract" -> pharmNet.contract)
+      tx.addVertex ("class:PharmNet", map)
+    }
+
+    def addPharmacy (pharm:Pharmacy)(implicit tx:OrientGraph):Vertex = {
+      val map:JavaMap[String, Object] = Map(
+        "name" -> pharm.name,
+        "chiefPhone" -> pharm.chiefPhone,
+        "chiefName" -> pharm.chiefName,
+        "tradeRoomPhone" -> pharm.tradeRoomPhone,
+        "cityCode" -> pharm.cityCode,
+        "cityName" -> pharm.cityName,
+        "streetCode" -> pharm.streetCode,
+        "streetName" -> pharm.streetName,
+        "buildingCode" -> pharm.buildingCode,
+        "buildingName" -> pharm.buildingName,
+        "contractExt" -> pharm.contractExt
+      )
+
+      val phVtx = tx.addVertex ("class:Pharmacy", map)
+      // find or add PharmNet
+      if (pharm.pharmNet != null) {
+        val phNetVtx = findOrAddPharmNet(pharm.pharmNet)
+        phVtx.addEdge("PhNet", phNetVtx)
+      }
+
+      phVtx
+    }
+    
+    def addReport (rep:Report):OrientGraph => Report = {
+      tx => {
+        implicit val gtx = tx
+        val map:JavaMap[String, Object] = Map("createDate" -> rep.createDate.toDate)
+
+        // There are several document should be create inside the transaction
+        // First of all create report vertex
+        val repVtx = tx.addVertex ("class:Report", map)
+        // Adding drugs to report, if exists
+        addDrugsToReport (repVtx, rep.drugs)
+
+        // Find or add pharmacy and pharmnet
+        val phVtx = findOrAddPharmacy (rep.pharmacy)
+        repVtx.addEdge ("ReportPharm", phVtx)
+        
+        // Add link to owner
+        findVertexByAttrs(tx, "PhUser", Array("login"), Array(rep.owner.login)) match {
+          case Some(vtx) => repVtx.addEdge ("ReportWorker", vtx)
+          case  _ => throw new IllegalArgumentException("owner not found: " + rep.owner.login)
+        }
+
+        // Add link to PrjCycle
+        repVtx.addEdge("ReportCycle", tx.getVertex("#" + rep.cycle.id))
+        val Report(repRet) = repVtx
+        repRet
       }
     }
   }

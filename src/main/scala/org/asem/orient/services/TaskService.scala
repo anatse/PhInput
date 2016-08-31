@@ -16,9 +16,9 @@ import scala.collection.JavaConversions._
 object TaskService extends BaseDB {
   /**
     * Function ertrieves all task from database
-     * @return list of tasks with comments
+    * @return list of tasks with comments
     */
-  def findAllTasks = Database.getTx {tx => val vtxs = tx.getVerticesOfClass("Task"); for {vtx <- vtxs} yield {val Task (task) = vtx;task}}.toList
+  def findAllTasks = Database.getTx {tx => val vtxs = tx.getVerticesOfClass("Task"); for {vtx <- vtxs} yield {val Task (task) = vtx;task}}.toList.sortWith((a:Task,b:Task) => a.changeDate.isAfter(b.changeDate))
 
   private def task2map (task:Task) = Map( "name" -> task.name, "content" -> task.content, "status" -> task.status, "assignedPerson" -> task.assignedPerson,
     "changeDate" -> task.changeDate, "deadLine" -> task.deadLine, "owner" -> task.owner )
@@ -78,14 +78,14 @@ object TaskService extends BaseDB {
       }
     )
   }
-  
+
   def addComment (taskId:String, comment:Comment) = {
     Database.getTx(
       graph => {
         graph.getVertex("#" + taskId) match {
           case vtx: OrientVertex => {
             val comVtx = addVertex("Comment", Map(
-              "owner" -> comment.owner, 
+              "owner" -> comment.owner,
               "comment" -> comment.comment,
               "createDate" -> comment.createDate
             )).apply(graph)
