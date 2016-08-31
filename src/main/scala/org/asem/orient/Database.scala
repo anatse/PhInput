@@ -67,7 +67,13 @@ object Database {
   def getTx[T] (performs: OrientGraph => T):T = {
     val g = pool.getTx
     try {
-      performs (g)
+      val res = performs (g)
+      g.commit
+      res
+    }
+    catch {
+      case e:Throwable => g.rollback
+        throw e
     }
     finally {
       g.shutdown()

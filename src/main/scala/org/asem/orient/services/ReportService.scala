@@ -5,28 +5,17 @@ import org.asem.orient.model.entities.{JacksonJsonSupport, _}
 import spray.http._
 import MediaTypes._
 
-/**
-  * Service object define report service functions
-  */
-object ReportService extends BaseDB {
-  /**
-    * Function retrieves all reports for given cycleid and user login. Reports retrivied by several steps
-    * <ul>
-    *   <li>find cycle vertex by id in orientdb</li>
-    *   <li>find user id from orientdb by login</li>
-    *   <li>find all reports by calling PrjService.findReportsForUser
-    * </ul>
-    * @see PrjService
-    * @param cycleId cycle identifier
-    * @param login user login
-    * @return list of erports
-    */
-    def findReportsForUser(cycleId:String, login:String):List[Report] = {
-      Database.getTx( tx => {
-        val PrjCycle(cycle) = tx.getVertex("#" + cycleId)
-        val PrjUser(user) = findVertexByAttr(tx, "PhUser", "login", login).getOrElse(null)
-        PrjService.findReportsForUser(cycle, user).apply(tx)
-      })
+object ReportService {
+  def findReportsForUser (cycleId:String, login:String) = {
+    Database.getTx {
+      tx => val user = PhUserService.findUserByLogin (login) match {
+        case Some(vtx) => val PrjUser(usr) = vtx; usr
+        case _ => throw new IllegalArgumentException(s"User {login} not found")
+      }
+
+      val cycle = PrjService.findPrjCycleById (cycleId)(tx)
+      PrjService. findReportsForUser(cycle, user)(tx)
+    }
   }
 }
 
@@ -37,8 +26,8 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
   private val listReportsRouter = get {
     auth {
       user => path("report") {
-        parameters('cycle) {
-          cycle => respondWithMediaType(`application/json`) (complete (ReportService.findReportsForUser(cycle, user.login)))
+        parameters('cycleId) {
+          cycleId => respondWithMediaType(`application/json`) (complete (ReportService.findReportsForUser(cycleId, user.login)))
         }
       }
     }
