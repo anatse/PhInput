@@ -2,49 +2,16 @@ import 'babel-polyfill'
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import { createStore, applyMiddleware, compose } from 'redux'
-import thunkMiddleware from 'redux-thunk'
-import createLogger from 'redux-logger'
-import rootReducer from './reducers'
 import App from './components/App'
-import { fetchTasks } from './actions'
+import {initWebSocket, addOnMessage} from './websocket'
+import configureStore from './store/configureStore'
+import {fetchTasks} from './actions'
 
 import stylesCss from './styles/styles.scss';
 
-const loggerMiddleware = createLogger()
+window.addEventListener("load", initWebSocket, false);
 
-let store;
-if (process.env.NODE_ENV === 'production') {
-  store = createStore(
-    rootReducer,
-      applyMiddleware(
-        thunkMiddleware // lets us dispatch() functions
-      )
-  );
-}else {
-  store = createStore(
-    rootReducer,
-    compose(
-      applyMiddleware(
-        thunkMiddleware, // lets us dispatch() functions
-        loggerMiddleware // neat middleware that logs actions
-      ),
-      // lets us use React Chrome dev tools plugin
-      window.devToolsExtension && window.devToolsExtension()
-    )
-  );
-}
-if (module.hot) {
-  // Enable Webpack hot module replacement for reducers
-  module.hot.accept('./reducers', () => {
-    const nextRootReducer = require('./reducers/index');
-    store.replaceReducer(nextRootReducer);
-  });
-}
-
-// store.dispatch(fetchTasks()).then(() =>
-//   console.log(store.getState())
-// )
+let store = configureStore()
 
 render(
   <Provider store={store}>
@@ -54,3 +21,18 @@ render(
 )
 
 module.hot.accept();
+
+// move this... somewhere
+addOnMessage((evt)=>{
+  console.log("onMsg:", evt.data);
+  let msg = "Получено событие об изменении данных. Обновимся ?";
+  switch (evt.data) {
+      case 'TASKS_UPDATED:DELETED':
+      case 'TASKS_UPDATED:COMMENT_ADDED':
+      case 'TASKS_UPDATED:CHANGED':
+      case 'TASKS_UPDATED:ADDED':
+          // if (confirm(msg)) fetchTasks();
+      default:
+
+  }
+})

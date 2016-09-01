@@ -2,7 +2,7 @@
 <meta charset="utf-8" />
 <title>WebSocket Test</title>
 <script language="javascript" type="text/javascript">
-    var wsUri = "wss://localhost:8080/";
+    var wsUri = "wss://" + document.location.host + "/";
     var websocket = new WebSocket(wsUri);
     var output;
     function init() {

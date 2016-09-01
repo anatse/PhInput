@@ -59,7 +59,7 @@ const refreshTasks = (dispatch) => {
   // const mockPath = '/test/mock/simple.json';
   return axios.get(scalaPath, {params:{antiCache:Date.now()}})
     .then(response => {
-      console.log(response);
+      // console.log(response);
       dispatch(receiveTasksOk(response.data))
     })
     .catch( error => {
@@ -101,7 +101,7 @@ export const postEditedTask = (task) => {
 
     return axios.put('/task/' + task.id , task)
       .then(function (response) {
-        console.log(response);
+        // console.log(response);
         dispatch(saveEditedTaskOk(response.data))
         // refresh
         fetchTasks()(dispatch);
@@ -149,7 +149,7 @@ export const postNewTask = (task) => {
 
     return axios.post('/task', taskToSave)
       .then(function (response) {
-        console.log(response);
+        // console.log(response);
           dispatch(saveNewTaskOk(response.data))
           // refresh
           fetchTasks()(dispatch);
@@ -190,7 +190,7 @@ export const initDeleteTask = (taskId) => {
 
     return axios.delete('/task/' + taskId)
       .then(function (response) {
-        console.log(response);
+        // console.log(response);
         dispatch(deleteTaskOk(response.data))
         // refresh
         fetchTasks()(dispatch);
@@ -229,7 +229,7 @@ export const saveComment = (comment, taskId) => {
 
     return axios.post('/task/' + taskId + '/comment', comment)
       .then(function (response) {
-        console.log(response);
+        // console.log(response);
         dispatch(postCommentOk(response.data))
         // refresh
         fetchTasks()(dispatch);

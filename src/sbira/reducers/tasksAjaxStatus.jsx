@@ -5,7 +5,6 @@ const tasksAjaxStatus = (state ={isLoading:true, lastUpdate: null}, action) => {
         case 'SAVE_NEW_TASK':
         case 'DELETE_TASK':
         case 'POST_COMMENT':
-            console.log("LOADING STATE UPDATED TO TRUE!", action.type);
             return {...state, isLoading: true}
         case 'RECEIVE_TASKS_OK':
         case 'RECEIVE_TASKS_ERR':

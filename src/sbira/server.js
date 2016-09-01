@@ -16,13 +16,16 @@ new WebpackDevServer(webpack(config), {
     compress: true,
     proxy: {
         '/task/*': {
-            target: 'http://' + servicesHost
+            target: 'https://' + servicesHost,
+            secure:false
         },
         '/pub/*': {
-            target: 'http://' + servicesHost
+            target: 'https://' + servicesHost,
+            secure:false
         },
         '/login/*': {
-            target: 'http://' + servicesHost
+            target: 'https://' + servicesHost,
+            secure:false
         }
     }
 }).listen(80, host, function(err, result) {
