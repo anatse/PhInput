@@ -1,0 +1,65 @@
+$bgcolor: transparent;
+$borderColor: #909090;
+body {font-family: sans-serif; background: #dedede;}
+input, textarea {background: transparent;}
+.status-info {position: fixed; left:15px; top: 15px;}
+// .loading-msg { width: 100%; text-align: center; }
+.tasks { text-align: center;
+  .add-wrapper{ width:50%; margin: 20px auto;
+    .name-input{ width:20%; display:inline-block;}
+    .desc-input{ width:40%; display:inline-block;}
+    .add-btn { transition: background-color 0.3s ease; height: 30px; margin: 20px auto; border: 1px dashed $borderColor; display: inline-block; cursor: pointer; padding: 5px 10px; line-height: 30px; font-size: 18px; background: green; color: white; border-radius: 10px;
+      &:hover { background: #0b0; }
+    }
+  }
+  .task { min-width: 50%; border: 1px dashed $borderColor; background: $bgcolor; margin: 40px auto 10px; position: relative; padding-left: 50px; height: 300px; display: inline-block;
+    .status { position: absolute; width: 35px; left: 0; top: 0; height: 100%; transition: background-color 0.3s ease;
+      &.new { background: orange; }
+      &.in-progress { background: blue; }
+      &.done { background: green; }
+      &.reopened { background: orange; }
+      &.closed { background: grey; }
+    }
+    .label { position: absolute; top: -26px; left: 0; height: 20px; width: 200px; padding: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  border-width: 1px 1px 0 1px; border-style: dashed; border-color: $borderColor; background: $bgcolor;
+      .id { font-weight: bold; }
+      .name { }
+    }
+    .block { height: 100%; max-height: 290px; display: inline-block; float: left; }
+    .content { width: 250px; padding: 5px;
+      textarea { height: 200px; max-height: 250px; width: 240px; max-width: 240px; margin: 0; background: $bgcolor; padding: 5px; z-index: 9; }
+    }
+    .comments { width: 400px; margin: 5px; max-height: 280px; border: 1px solid $borderColor;
+      .cont{ position: relative; width:100%; height:100%; padding-bottom:30px;
+        .create{ position: absolute; bottom:30px; left:0px; height:20px; width:100%;
+          input { width:74%; }
+          button { width:25%;}
+        }
+      }
+    }
+    .recent { padding: 5px; width: 25%; text-align: right;
+      .changed,
+      .owner,
+      .deadline { span { font-weight: bold; }
+      }
+    }
+    .btn-cont{ position: absolute; bottom: 2px; right: 2px;
+      .btn{ height: 20px; width: 80px; padding: 5px 10px; line-height: 20px; font-size: 14px; text-align: center; border-radius: 10px; color: white; cursor: pointer; transition: background-color 0.3s ease; margin:5px 0px 0px 0px; }
+      .save-btn { background: #0b0;
+        &:hover { background: green; }
+      }
+      .del-btn { background: #f00;
+        &:hover { background: #c00; }
+      }
+    }
+
+    .progress-toolbar{position: absolute; top: -28px; right: 0; height: 24px; padding: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  border-width: 1px 1px 0 1px; border-style: dashed; border-color: $borderColor; background: $bgcolor;
+      .progress-btn {display: inline-block; float: right; margin: 0px 3px; padding: 2px 15px; border: none;border-radius: 10px;cursor: pointer; height: 18px; line-height: 18px; font-size:12px; font-weight: bold; color: #fff;
+        &.new { background: orange; }
+        &.in-progress { background: blue; }
+        &.done { background: green; }
+        &.reopened { background: orange; }
+        &.closed { background: grey; }
+      }
+    }
+  }
+}
