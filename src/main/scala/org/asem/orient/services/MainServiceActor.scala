@@ -12,6 +12,7 @@ import spray.routing._
  * @see http://spray.io/documentation/1.2.2/spray-routing/predefined-directives-by-trait/
  * @see http://spray.io/documentation/1.2.2/spray-routing/scheme-directives/scheme/
  * @see http://spray.io/msug
+ * @see https://github.com/dcaoyuan/spray-websocket
  */
 final case class Push(msg: String)
 

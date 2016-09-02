@@ -19,6 +19,8 @@ DROP CLASS ReportWorker;
 DROP CLASS ReportChecker;
 DROP CLASS ReportCycle;
 DROP CLASS ReportPharm;
+DROP CLASS PharmCycle;
+DROP CLASS PrjCycleWorker;
 DROP CLASS Task;
 DROP CLASS Comment;
 
@@ -72,6 +74,11 @@ ALTER PROPERTY PrjCycle.startDate MANDATORY TRUE;
 ALTER PROPERTY PrjCycle.endDate MANDATORY TRUE;
 ALTER PROPERTY PrjCycle.visits MANDATORY TRUE;
 
+CREATE CLASS PrjCycleWorker EXTENDS E;
+CREATE PROPERTY PrjCycleWorker.in LINK PhUser;
+CREATE PROPERTY PrjCycleWorker.out LINK PrjCycle;
+CREATE INDEX UxPrjCycleWorker ON PrjCycleWorker(out,in) UNIQUE;
+
 CREATE CLASS PharmNet EXTENDS V;
 CREATE PROPERTY PharmNet.name STRING;
 CREATE PROPERTY PharmNet.contract STRING;
@@ -97,23 +104,29 @@ alter property Pharmacy.buildingName mandatory true;
 
 CREATE INDEX UxPharmacyAddress ON Pharmacy(cityName, streetName, buildingName) UNIQUE;
 
+CREATE CLASS PharmCycle EXTENDS E;
+CREATE PROPERTY PharmCycle.out LINK PrjCycle;
+CREATE PROPERTY PharmCycle.in LINK Pharmacy;
+ALTER PROPERTY PharmCycle.out MANDATORY TRUE;
+ALTER PROPERTY PharmCycle.in MANDATORY TRUE;
+CREATE INDEX UxPharmCycle ON PharmCycle(out,in) UNIQUE;
+
 CREATE CLASS PhNet EXTENDS E;
 CREATE PROPERTY PhNet.out LINK Pharmacy;
 CREATE PROPERTY PhNet.in LINK PharmNet;
 ALTER PROPERTY PhNet.out MANDATORY TRUE;
 ALTER PROPERTY PhNet.in MANDATORY TRUE;
+CREATE INDEX UxPhNet ON PhNet(out,in) UNIQUE;
 
 CREATE CLASS Worker EXTENDS E;
 CREATE PROPERTY Worker.out LINK PhUser;
 CREATE PROPERTY Worker.in LINK Project;
 ALTER PROPERTY Worker.out MANDATORY TRUE;
 ALTER PROPERTY Worker.in MANDATORY TRUE;
-
 CREATE INDEX UxWorker ON Worker(out,in) UNIQUE;
 
 CREATE CLASS Manager EXTENDS Worker;
 CREATE CLASS Employee EXTENDS Worker;
-CREATE CLASS Owner EXTENDS Worker;
 
 CREATE CLASS Report EXTENDS V;
 create property Report.createDate Date;

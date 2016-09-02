@@ -1,5 +1,6 @@
 package org.asem.orient.model
 
+import com.orientechnologies.orient.core.sql.OCommandSQL
 import java.util.Collections
 
 /**
@@ -176,10 +177,10 @@ package object entities {
         Some (rep)
     }
   }
-
+    
   object PrjService {
     import java.util.{Map => JavaMap, List => JavaList}
-    val ID_PATTERN = "([0-9]+:[0-9]+)".r
+    val idPattern = "([0-9]+:[0-9]+)".r
 
     /**
       * Function used to check format of identifier
@@ -187,7 +188,7 @@ package object entities {
       * @return identifier if suitable or throw an error
       */
     private def checkId (id:String):String = id match {
-      case ID_PATTERN(c) => c
+      case idPattern(c) => c
       case _ => throw new IllegalArgumentException ("Wrong id is provided: " + id)
     }
     
@@ -217,13 +218,13 @@ package object entities {
       * @return active project cycles
       */
     def findActivePrjCycles(prj:Project, user:PrjUser):OrientGraph => List[PrjCycle] = {
-      val SQL_QUERY = """select *
+      val sqlQuery = """select *
                         |from PrjCycle
                         |where in() in [:projectId, :userId] and SYSDATE() between startDate and endDate
                         |order by startDate""".stripMargin.replaceAll("\n", " ")
       val params = Map("projectId" -> new ORecordId("#" + prj.id), "userId" -> new ORecordId("#" + user.id))
       tx => {
-        val vtxs = Query.executeQuery(tx, SQL_QUERY, params)
+        val vtxs = Query.executeQuery(tx, sqlQuery, params)
         for (vtxPrj <- vtxs) yield { val PrjCycle (prj) = vtxPrj; prj}
       }.toList
     }
@@ -241,9 +242,9 @@ package object entities {
       * @return list of reports for this cycle w/o any filtering
       */
     def findAllReports (cycle:PrjCycle): OrientGraph => List[Report] = tx => {
-      val SQL_QUERY = "select expand(in('ReportCycle')) from #" + checkId(cycle.id)
-      val vtxs = Query.executeQuery(tx, SQL_QUERY, Collections.EMPTY_MAP)
-      println ("vtxs: " + vtxs + ", " + SQL_QUERY)
+      val sqlQuery = "select expand(in('${EdgeNames.ReportCycle}')) from #" + checkId(cycle.id)
+      val vtxs = Query.executeQuery(tx, sqlQuery, Collections.EMPTY_MAP)
+      println ("vtxs: " + vtxs + ", " + sqlQuery)
       for (vtxRep <- vtxs) yield {
         val Report (rep) = vtxRep; rep
       }
@@ -256,7 +257,7 @@ package object entities {
       * @return list of reports
       */
     def findReportsForUser (cycle:PrjCycle, user:PrjUser): OrientGraph => List[Report] = tx => {
-      val SQL_QUERY = "select expand(in('ReportCycle')) from :cycleId where in('ReportCycle').out('ReportWorker') in [:userId]"
+      val SQL_QUERY = "select expand(in('${EdgeNames.ReportCycle}')) from :cycleId where in('${EdgeNames.ReportCycle}').out('${EdgeNames.ReportWorker}') in [:userId]"
       val params = Map("cycleId" -> new ORecordId("#" + cycle.id), "userId" -> new ORecordId("#" + user.id))
       val vtxs = Query.executeQuery(tx, SQL_QUERY, params)
       for (vtxRep <- vtxs) yield {
@@ -274,7 +275,7 @@ package object entities {
         val map:JavaMap[String, Object] = Map("name" -> prj.name, "startDate" -> prj.startDate.toDate)
         val vtx = tx.addVertex("class:Project", map)
         findVertexByAttrs(tx, "PhUser", Array("login"), Array(user.login)) match {
-          case Some(uVtx) => uVtx.addEdge ("Manager", vtx)
+          case Some(uVtx) => uVtx.addEdge (EdgeNames.Manager, vtx)
           case  _ => throw new IllegalArgumentException("owner not found: " + user.login)
         }
         
@@ -358,7 +359,53 @@ package object entities {
 
       phVtx
     }
-    
+
+    def changeReport (rep:Report):OrientGraph => Report = {
+      tx => {
+        implicit val gtx = tx
+        // Get report by id
+        val repVtx = tx.getVertex ("#" + rep.id)
+        // Adding drugs to report, if exists
+        addDrugsToReport (repVtx, rep.drugs)
+
+        // Find or add pharmacy and pharmnet
+        val phVtx = findOrAddPharmacy (rep.pharmacy)
+        val phOldVtx = repVtx.out(EdgeNames.ReportPharm)
+        if (phVtx.id != phOldVtx.id) {
+          repVtx.getEdges(OUT, EdgeNames.ReportPharm).headOption match {case Some(edge) => tx.removeEdge(edge)}
+          repVtx.addEdge (EdgeNames.ReportPharm, phVtx)
+        }
+
+        // Add relationship between pharmacy and project cycle. This relation should be unique 
+        // Only one pharmacy should be used in one project cycle
+        val cycleVtx = tx.getVertex("#" + rep.cycle.id)
+        val cycleOldVtx = repVtx.out(EdgeNames.PharmCycle)
+        if (cycleVtx.id != cycleOldVtx.id) {
+          cycleVtx.getEdges(OUT, EdgeNames.PharmCycle).headOption match {case Some(edge) => tx.removeEdge(edge)}
+          cycleVtx.addEdge (EdgeNames.PharmCycle, phVtx)
+        }
+
+        // Add link to PrjCycle
+        val cycleOldVtx1 = repVtx.out(EdgeNames.ReportCycle)
+        if (cycleVtx.id != cycleOldVtx1.id) {
+          repVtx.getEdges(OUT, EdgeNames.ReportCycle).headOption match {case Some(edge) => tx.removeEdge(edge)}
+          repVtx.addEdge(EdgeNames.ReportCycle, cycleVtx)
+        }
+
+        // Add check flag and checker if exists
+        repVtx.setProperty("checked", rep.checked)
+        if (rep.checker != null) {
+          findVertexByAttrs(tx, "PhUser", Array("login"), Array(rep.owner.login)) match {
+            case Some(vtx) => repVtx.addEdge (EdgeNames.ReportChecker, vtx)
+            case  _ => throw new IllegalArgumentException("checker not found: " + rep.owner.login)
+          }
+        }
+
+        val Report(repRet) = repVtx
+        repRet
+      }
+    }
+
     def addReport (rep:Report):OrientGraph => Report = {
       tx => {
         implicit val gtx = tx
@@ -372,19 +419,73 @@ package object entities {
 
         // Find or add pharmacy and pharmnet
         val phVtx = findOrAddPharmacy (rep.pharmacy)
-        repVtx.addEdge ("ReportPharm", phVtx)
+        repVtx.addEdge (EdgeNames.ReportPharm, phVtx)
         
+        // Add relationship between pharmacy and project cycle. This relation should be unique 
+        // Only one pharmacy should be used in one project cycle
+        val cycleVtx = tx.getVertex("#" + rep.cycle.id)
+        cycleVtx.addEdge (EdgeNames.PharmCycle, phVtx)
+
         // Add link to owner
         findVertexByAttrs(tx, "PhUser", Array("login"), Array(rep.owner.login)) match {
-          case Some(vtx) => repVtx.addEdge ("ReportWorker", vtx)
+          case Some(vtx) => repVtx.addEdge (EdgeNames.ReportWorker, vtx)
           case  _ => throw new IllegalArgumentException("owner not found: " + rep.owner.login)
         }
 
         // Add link to PrjCycle
-        repVtx.addEdge("ReportCycle", tx.getVertex("#" + rep.cycle.id))
+        repVtx.addEdge(EdgeNames.ReportCycle, cycleVtx)
         val Report(repRet) = repVtx
         repRet
       }
+    }
+
+    def addUserToProject (prjId:String, userId:String, isManager:Boolean):OrientGraph => Boolean = {
+      tx => {
+        checkId(prjId)
+        checkId(userId)
+        val par:JavaMap[String, Object] = Map("fromV" -> ("#" + prjId), "toV" -> ("#" +userId))
+        tx.command(new OCommandSQL(s"CREATE EDGE ${if (isManager) EdgeNames.Manager else EdgeNames.Employee} from :fromV to :toV")).execute(par);
+        true
+      }
+    }
+
+    def removeUserFromProject (prjId:String, userId:String):OrientGraph => Boolean = {
+      tx => {
+        checkId(prjId)
+        checkId(userId)
+        val par:JavaMap[String, Object] = Map("fromV" -> ("#" + prjId), "toV" -> ("#" + userId))
+        tx.command(new OCommandSQL("DELETE EDGE from :fromV to :toV")).execute(par);
+        true
+      }
+    }
+    
+    def addUserToPrjCycle (cycleId:String, userId:String):OrientGraph => Boolean = {
+      tx => {
+        checkId(cycleId)
+        checkId(userId)
+        val par:JavaMap[String, Object] = Map("fromV" -> ("#" + cycleId), "toV" -> ("#" + userId))
+        tx.command(new OCommandSQL(s"CREATE EDGE ${EdgeNames.PrjCycleWorker} from :fromV to :toV")).execute(par);
+        true
+      }
+    }
+    
+    def removeUserFromPrjCycle (cycleId:String, userId:String):OrientGraph => Boolean = {
+      tx => {
+        checkId(cycleId)
+        checkId(userId)
+        val par:JavaMap[String, Object] = Map("fromV" -> ("#" + cycleId), "toV" -> ("#" + userId))
+        tx.command(new OCommandSQL("DELETE EDGE from :fromV to :toV")).execute(par);
+        true
+      }
+    }
+
+    def findAllPrjUsers(offset:Integer):OrientGraph => List[PrjUser] = {
+      val sqlQuery = "select * from PhUser limit 200 offset :offset"
+      tx => {
+        val par:JavaMap[String, Object] = Map("offset" -> offset)
+        val vtxs = Query.executeQuery(tx, sqlQuery, par)
+        for (vtxPrj <- vtxs) yield { val PrjUser (prj) = vtxPrj; prj}
+      }.toList
     }
   }
 }

@@ -29,10 +29,16 @@ object TaskService extends BaseDB {
     * @return nothing
     */
   def addTask (task:Task):Task = {
+    import org.asem.Boot.{service => mainService}
+
     Database.getTx(
       tx => {
         val vtx = addVertex("Task", task2map(task)).apply(tx)
         val Task(ret) = vtx
+        
+        if (mainService != null)
+          mainService ! Push("Hello new task")
+    
         ret
       }
     )
@@ -50,26 +56,6 @@ object TaskService extends BaseDB {
               Left(task)
             }
             case _ => Right("Error updating record: " + "#" + task.id)
-          }
-        }
-        catch {
-          case e:Exception => Right(e.toString)
-        }
-      }
-    )
-  }
-
-  def deleteTask (taskId: String):Either[String, String] = {
-    Database.getTx(
-      graph => {
-        try {
-          graph.getVertex("#" + taskId) match {
-            case vtx: OrientVertex => {
-              graph.removeVertex(vtx)
-              graph.commit()
-              Left("DELETE SUCCESSFULL")
-            }
-            case _ => Right("Error deleting record: " + "#" + taskId)
           }
         }
         catch {
@@ -131,10 +117,7 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
     auth {
       user => path("task" / Segment) {
         reportId => {
-          TaskService.deleteTask(reportId) match {
-            case Left(rep) => respondWithStatus(StatusCodes.OK   ) { complete (rep)}
-            case Right(s) => respondWithStatus(StatusCodes.InternalServerError) { complete (s) }
-          }
+          complete {"Nope"}
         }
       }
     }

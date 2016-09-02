@@ -68,4 +68,9 @@ object Boot extends App {
     
   implicit val timeout = Timeout(5 seconds)
   IO(UHttp) ? Http.Bind(service, interface = config.getString("spray.can.server.host"), port = config.getInt("spray.can.server.port"))
+  
+//  while (true) {
+//    var msg = readLine("Give a message and hit ENTER to push message to the children ...\n")
+//    service ! PushToChildren(msg)
+//  }
 }

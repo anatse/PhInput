@@ -6,7 +6,7 @@ import spray.http._
 import MediaTypes._
 
 object ReportService {
-  def findReportsForUser (cycleId:String, login:String) = {
+  def findReportsForUser (cycleId:String, login:String):List[Report] = {
     Database.getTx {
       tx => val user = PhUserService.findUserByLogin (login) match {
         case Some(vtx) => val PrjUser(usr) = vtx; usr
@@ -15,6 +15,17 @@ object ReportService {
 
       val cycle = PrjService.findPrjCycleById (cycleId)(tx)
       PrjService. findReportsForUser(cycle, user)(tx)
+    }
+  }
+
+  def addReport (login:String, rep:Report):Report = {
+    Database.getTx {
+      tx => val user = PhUserService.findUserByLogin (login) match {
+        case Some(vtx) => val PrjUser(usr) = vtx; usr
+        case _ => throw new IllegalArgumentException(s"User {login} not found")
+      }
+ 
+      PrjService.addReport (rep.copy(owner = user))(tx)
     }
   }
 }
@@ -33,18 +44,15 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
     }
   }
 
-//  private val addReportsRouter = post {
-//    auth {
-//      user => path("report") {
-//        entity(as[Report]) {
-//          report => ReportService.createReport(user.login, report) match {
-//            case Left(rep) => respondWithStatus(StatusCodes.Created)(complete(rep))
-//            case Right(s) => respondWithStatus(StatusCodes.Conflict) {complete(s)}
-//          }
-//        }
-//      }
-//    }
-//  }
+  private val addReportsRouter = post {
+    auth {
+      user => path("report") {
+        entity(as[Report]) {
+          report => respondWithMediaType(`application/json`) (complete (ReportService.addReport(user.login, report)))
+        }
+      }
+    }
+  }
 //
 //  private val deleteReportRouter = delete {
 //    auth {
@@ -78,5 +86,5 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
 //    }
 //  }
 
-  lazy val reportRoute = listReportsRouter //~ addReportsRouter ~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
+  lazy val reportRoute = listReportsRouter ~ addReportsRouter //~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
 }
