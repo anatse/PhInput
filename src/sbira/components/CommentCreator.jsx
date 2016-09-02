@@ -10,7 +10,8 @@ class CommentCreator extends Component {
         }
     }
 
-    onAddComment = () => {
+    onAddComment = (e) => {
+        e && e.preventDefault();
         const {taskId} = this.props;
         const comment = {
             owner: 'user',
@@ -24,16 +25,16 @@ class CommentCreator extends Component {
     render() {
         const {taskId, comments, onAddComment} = this.props;
         return (
-            <div className='create'>
-                <Col sm={8}>
+            <form className='create' onSubmit={this.onAddComment}>
+                <div className='msg'>
                     <FormControl type="text" placeholder="Введите сообщение..." value={this.state.comment} onChange={(event) => {
                         this.setState({comment: event.target.value});
                     }} autoComplete='off'/>
-                </Col>
-                <Col sm={4}>
-                    <Button onClick={this.onAddComment}>Добавить</Button>
-                </Col>
-            </div>
+                </div>
+                <div className='add-comment-btn'>
+                    <Button block onClick={this.onAddComment}>Добавить</Button>
+                </div>
+            </form>
         )
     }
 

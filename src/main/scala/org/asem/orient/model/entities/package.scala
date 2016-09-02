@@ -80,7 +80,7 @@ package object entities {
         deadLine = vtx.prop[Date]("deadLine"),
         owner = vtx.prop("owner")
       ))
-      else None
+    else None
   }
 
   case class PrjUser(id: String = null, login: String, firstName: String = "", secondName: String = "", email: String = "") extends BaseEntity
@@ -142,7 +142,7 @@ package object entities {
           contractExt = vtx.prop("contractExt")
         )
       )
-      else None
+    else None
   }
 
   case class Drug(name: String, existence:Boolean, price: BigDecimal)
@@ -219,9 +219,9 @@ package object entities {
       */
     def findActivePrjCycles(prj:Project, user:PrjUser):OrientGraph => List[PrjCycle] = {
       val sqlQuery = """select *
-                        |from PrjCycle
-                        |where in() in [:projectId, :userId] and SYSDATE() between startDate and endDate
-                        |order by startDate""".stripMargin.replaceAll("\n", " ")
+                       |from PrjCycle
+                       |where in() in [:projectId, :userId] and SYSDATE() between startDate and endDate
+                       |order by startDate""".stripMargin.replaceAll("\n", " ")
       val params = Map("projectId" -> new ORecordId("#" + prj.id), "userId" -> new ORecordId("#" + user.id))
       tx => {
         val vtxs = Query.executeQuery(tx, sqlQuery, params)

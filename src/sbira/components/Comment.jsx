@@ -10,9 +10,13 @@ class Comment extends Component {
         const {owner, comment, createDate} = this.props;
         const date = new Date(createDate);
         return (
-          <div>
-            {date.toLocaleDateString()} {date.toLocaleTimeString()} - {owner} : {comment}
-          </div>
+            <div className='comment'>
+                <span className='time'>{date.toLocaleDateString()} {date.toLocaleTimeString()}</span>
+                &nbsp;-&nbsp;
+                <span className='author'>{owner}</span>
+                &nbsp;:&nbsp;
+                <span className="text">{comment}</span>
+            </div>
         )
     }
 

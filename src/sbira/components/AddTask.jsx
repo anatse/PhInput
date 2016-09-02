@@ -4,16 +4,6 @@ import {Modal, Button, FormGroup, ControlLabel, FormControl} from 'react-bootstr
 const newName = '';
 const newContent = '';
 
-// function FieldGroup({ id, label, help, ...props }) {
-//   return (
-//     <FormGroup controlId={id}>
-//       <ControlLabel>{label}</ControlLabel>
-//       <FormControl {...props} />
-//       {help && <HelpBlock>{help}</HelpBlock>}
-//     </FormGroup>
-//   );
-// }
-
 class AddTask extends Component {
 
     constructor(props) {
@@ -61,14 +51,14 @@ class AddTask extends Component {
                         <Modal.Title>Добавление новой задачи</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <div className='add-wrapper'>
+                        <div className='add-task-wrapper'>
                             <FormGroup controlId="name-input" key={1}>
                                 <ControlLabel>Имя</ControlLabel>
                                 <FormControl type="text" placeholder="Введите имя задачи (1-2 слова)... " value={this.state.name} onChange={this.onChangeName}/>
                             </FormGroup>
                             <FormGroup controlId="desc-input" key={2}>
                                 <ControlLabel>Описание</ControlLabel>
-                                <FormControl bsSize="large" componentClass="textarea" placeholder="Введите описание..." value={this.state.content} onChange={this.onChangeContent}/>
+                                <FormControl className='desc-input' componentClass="textarea" placeholder="Введите описание..." value={this.state.content} onChange={this.onChangeContent}/>
                             </FormGroup>
                         </div>
                     </Modal.Body>

@@ -56,7 +56,7 @@ export const fetchTasks = (param) => {
 }
 const refreshTasks = (dispatch) => {
   const scalaPath = '/task';
-  // const mockPath = '/test/mock/simple.json';
+  // const scalaPath = '/test/mock/simple.json';
   return axios.get(scalaPath, {params:{antiCache:Date.now()}})
     .then(response => {
       // console.log(response);

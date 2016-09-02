@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import statuses, {getClassByStatus, getBtnTxtByStatus} from '../utils/taskStatuses'
 import CommentList from './CommentList'
-import {ButtonToolbar, ButtonGroup, Button} from 'react-bootstrap';
+import {ButtonToolbar, ButtonGroup, Button, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
 
 class Task extends React.Component {
 
@@ -40,11 +40,13 @@ class Task extends React.Component {
                     <span className='name'>{task.name}</span>
                 </div>
                 <div className='content block'>
-                    <div>Описание:</div>
-                    <textarea value={task.content} onChange={onChangeContent}/>
+                  <FormGroup  >
+                    <ControlLabel>Описание</ControlLabel>
+                    <FormControl componentClass="textarea" placeholder="Введите описание задачи..." value={task.content} onChange={onChangeContent} />
+                  </FormGroup>
                 </div>
                 <div className='comments block'>
-                    <CommentList taskId={task.id} comments={task.comments} onAddComment={onAddComment}/>
+                    <CommentList taskId={task.id} comments={task.comments || []} onAddComment={onAddComment}/>
                 </div>
                 <div className='recent block'>
                     <div className='changed'>Обновлён:
