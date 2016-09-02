@@ -11,14 +11,14 @@ class CommentList extends Component {
     render() {
         const {taskId, comments, onAddComment} = this.props;
         return (
-          <div className='cont'>
-            <div className='list'>
-              {comments.map((comment, index)=> {
-                return <Comment key={index} {...comment} />
-              })}
+            <div className='cont'>
+                <div className='cont-ins'>
+                    {comments.map((comment, index) => {
+                        return <Comment key={index} {...comment}/>
+                    })}
+                </div>
+                <CommentCreator taskId={taskId} onAddComment={onAddComment}/>
             </div>
-            <CommentCreator taskId={taskId} onAddComment={onAddComment} />
-          </div>
         )
     }
 
