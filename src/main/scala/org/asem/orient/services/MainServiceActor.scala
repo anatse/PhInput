@@ -22,6 +22,7 @@ class MainServiceActor(val serverConnection: ActorRef) extends HttpServiceActor
   with LoginService
   with ReportService
   with TaskService
+  with ProjectService
   with StaticResourceService {
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -76,6 +77,7 @@ class MainServiceActor(val serverConnection: ActorRef) extends HttpServiceActor
       ~ userManagementRoute
       ~ reportRoute
       ~ taskRoute
+      ~ projectRouter
   )
 }
 

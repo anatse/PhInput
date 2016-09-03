@@ -19,7 +19,7 @@ case class PhUser(login: String, password: String, email: String = "", firstName
 
   lazy val pwdHash = computeHash(password)
   
-  override def toString = login + "," + email + "," + firstName + "," + secondName + "," + manager.getOrElse(false)
+  override def toString = login + "," + email + "," + firstName + "," + secondName + "," + manager.getOrElse(false) + "," + id
 
   def computeHash(pwd: String): String = {
     if (pwd == null || pwd.isEmpty) {
@@ -31,23 +31,24 @@ case class PhUser(login: String, password: String, email: String = "", firstName
     }
   }
   
-  def unapply(user:PhUser) = Some (user.login, user.pwdHash, user.email, user.firstName, user.secondName, user.activated, user.manager)
+  def unapply(user:PhUser) = Some (user.login, user.pwdHash, user.email, user.firstName, user.secondName, user.activated, user.manager, user.id)
 }
 
 /**
   * Object used to deserialize PhUser from string, using scala regexp unapply function
   */
 object PhUser extends DefaultJsonProtocol with BaseModelFuncs {
-  private val PhUserRegex = "(.*),(.*),(.*),(.*),(.*)".r
+  private val PhUserRegex = "(.*),(.*),(.*),(.*),(.*),(.*)".r
 
   def fromString(str: String): Option[PhUser] =  str match {
-    case PhUserRegex(login, email, firstName, secondName, manager) => Some(PhUser(
+    case PhUserRegex(login, email, firstName, secondName, manager, id) => Some(PhUser(
       login = login,
       password = "",
       email = email,
       firstName = firstName,
       secondName = secondName,
       activated = Some(true),
+      id = id,
       manager = Some(manager match {
         case "null" => false
         case s:String => s.toBoolean

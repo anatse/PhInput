@@ -14,7 +14,7 @@ object ReportService {
       }
 
       val cycle = PrjService.findPrjCycleById (cycleId)(tx)
-      PrjService. findReportsForUser(cycle, user)(tx)
+      PrjService. findReportsForUser(cycleId, login)(tx)
     }
   }
 

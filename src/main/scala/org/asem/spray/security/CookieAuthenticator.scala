@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-case class UserData (login:String, token:String, manager:Boolean)
+case class UserData (login:String, token:String, manager:Boolean, id:String)
 
 /**
   * Created by gosha-user on 30.07.2016.
@@ -60,7 +60,8 @@ class CookieAuthenticator {
         if (user != null) {
           val pu = loadUser(user.login, user.pwdHash)
           if (pu.isDefined) {
-            ret = Some(UserData(pu.get.login, RSA.encrypt(pu.get.toString), pu.get.manager.getOrElse(false)))
+            val user = pu.get
+            ret = Some(UserData(user.login, RSA.encrypt(user.toString), user.manager.getOrElse(false), user.id))
           }
         }
       }
@@ -70,7 +71,8 @@ class CookieAuthenticator {
       val pu = PhUser.fromString (userData)
 
       if (pu.isDefined) {
-        ret = Some(UserData(pu.get.login, userToken.get.content, pu.get.manager.getOrElse(false)))
+        val user = pu.get
+        ret = Some(UserData(user.login, RSA.encrypt(user.toString), user.manager.getOrElse(false), user.id))
       }
     }
 
