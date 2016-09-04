@@ -7,15 +7,19 @@ import MediaTypes._
 
 object ReportService {
   def findReportsForUser (cycleId:String, login:String):List[Report] = {
-    Database.getTx {
-      tx => val user = PhUserService.findUserByLogin (login) match {
-        case Some(vtx) => val PrjUser(usr) = vtx; usr
-        case _ => throw new IllegalArgumentException(s"User {login} not found")
-      }
-
-      val cycle = PrjService.findPrjCycleById (cycleId)(tx)
-      PrjService. findReportsForUser(cycleId, login)(tx)
+    if (cycleId.isEmpty) {
+      List()
     }
+    else
+      Database.getTx {
+        tx => val user = PhUserService.findUserByLogin (login) match {
+          case Some(vtx) => val PrjUser(usr) = vtx; usr
+          case _ => throw new IllegalArgumentException(s"User {login} not found")
+        }
+
+        val cycle = PrjService.findPrjCycleById (cycleId)(tx)
+        PrjService. findReportsForUser(cycleId, login)(tx)
+      }
   }
 
   def addReport (login:String, rep:Report):Report = {
@@ -86,5 +90,5 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
 //    }
 //  }
 
-  lazy val reportRoute = listReportsRouter ~ addReportsRouter //~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
+  lazy val reportRoute = {}//listReportsRouter ~ addReportsRouter //~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
 }

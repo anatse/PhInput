@@ -13,9 +13,16 @@ Ext.define('PH.locale.en', {
     titles: {
         navi: 'Navigation Menu',
         users: 'Users',
-        reports: 'Reports'
+        reports: 'Reports',
+        projects: 'Projects'
+    },
+    select: {
+        project: 'Choose project',
+        cycle: 'Choose cycle'
     },
     fields: {
+        name: 'Name',
+        startDate: 'Start date',
         login: 'login',
         firstName: 'firsName',
         secondName: 'secondName',

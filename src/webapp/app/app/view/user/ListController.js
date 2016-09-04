@@ -3,11 +3,6 @@ Ext.define("PH.view.user.ListController", {
     extend: 'Ext.app.ViewController',
     alias: 'controller.userList',
 
-    // refs: [{
-    //     ref: 'users',
-    //     selector: 'usersView'
-    // }],
-
     control: {
         '#': {
             itemdblclick: 'editUser'
@@ -31,7 +26,7 @@ Ext.define("PH.view.user.ListController", {
             record.set(values);
             grid.getStore().sync({
                 success: function(batch, opts) {
-                    win.close();
+                    win.hide();
                 },
                 failure: function (batch, opts) {
                     grid.getStore().load();
@@ -43,7 +38,7 @@ Ext.define("PH.view.user.ListController", {
                     }
                 }
             });
-            win.close();
+            win.hide();
         }, this);
     },
     createUser: function() {

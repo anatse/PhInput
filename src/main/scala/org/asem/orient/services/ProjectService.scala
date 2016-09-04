@@ -9,7 +9,7 @@ import spray.http.StatusCodes._
 /**
   * Created by gosha-user on 03.09.2016.
   */
-object ProjectService {
+object  ProjectService {
   /**
     * Get user object by login
     * @param login login
@@ -24,8 +24,8 @@ object ProjectService {
     */
   def findAllProjects (userId:String): List[Project] = Database.getTx (PrjService.findAllProjects(userId))
   def findActivePrjCycles (prjId:String, userId:String) = Database.getTx (PrjService.findActivePrjCycles(prjId, userId))
-  def findCycleReports (cycleId:String) = Database.getTx (PrjService.findAllReports(cycleId))
-  def findCycleReportsForUser (cycleId:String, userId:String) = Database.getTx (PrjService.findReportsForUser(cycleId, userId))
+  def findCycleReports (cycleId:String) = if (cycleId.isEmpty) List() else Database.getTx (PrjService.findAllReports(cycleId))
+  def findCycleReportsForUser (cycleId:String, userId:String) = if (cycleId.isEmpty) List() else Database.getTx (PrjService.findReportsForUser(cycleId, userId))
   def findPharmacyByAddress (cityName:String, streetName:String, buildingName:String) = Database.getTx (PrjService.findPharmacyByAddress(cityName, streetName, buildingName))
   def findPharmNet (cityName:String, streetName:String, buildingName:String) =  Database.getTx (PrjService.findPharmacyByAddress(cityName, streetName, buildingName))
   def addUserToProject (prjId:String, userId:String, isManager:Boolean) = Database.getTx (PrjService.addUserToProject(prjId, userId, isManager))
@@ -56,21 +56,25 @@ trait ProjectService extends BaseHttpService with JacksonJsonSupport {
 
   private val getActivePrjCycles = get {
     auth {
-      user => path("project" / Segment / "cycle") {
-        prjId => respondWithMediaType(`application/json`)(complete(ProjectService.findActivePrjCycles(prjId, user.id)))
+      user => path("cycle") {
+        parameters('prjId) {
+          (prjId) => respondWithMediaType(`application/json`)(complete(ProjectService.findActivePrjCycles(prjId, user.id)))
+        }
       }
     }
   }
 
   private val getCycleReports = get {
     auth {
-      user => path("cycle" / Segment / "report") {
-        cycleId => respondWithMediaType(`application/json`)(
-          user.manager match {
-            case true => complete (ProjectService.findCycleReports (cycleId) )
-            case false => complete (ProjectService.findCycleReportsForUser (cycleId, user.id) )
-          }
-        )
+      user => path("report") {
+        parameters('cycleId) {
+          (cycleId) => respondWithMediaType(`application/json`)(
+            user.manager match {
+              case true => complete(ProjectService.findCycleReports(cycleId))
+              case false => complete(ProjectService.findCycleReportsForUser(cycleId, user.id))
+            }
+          )
+        }
       }
     }
   }

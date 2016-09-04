@@ -238,7 +238,7 @@ package object entities {
 
     /**
       * Function retirves all reports for given project cycle
-      * @param cycle project cycle
+      * @param cycleId project cycle
       * @return list of reports for this cycle w/o any filtering
       */
     def findAllReports (cycleId:String): OrientGraph => List[Report] = tx => {
@@ -256,7 +256,7 @@ package object entities {
       */
     def findReportsForUser (cycleId:String, userId:String): OrientGraph => List[Report] = tx => {
       val SQL_QUERY = s"select expand(in('${EdgeNames.ReportCycle}')) from :cycleId where in('${EdgeNames.ReportCycle}').out('${EdgeNames.ReportWorker}') in [:userId]"
-      val params = Map("cycleId" -> new ORecordId("#" + cycleId), "userId" -> new ORecordId("#" + userId))
+      val params = Map("cycleId" -> new ORecordId("#" + checkId(cycleId)), "userId" -> new ORecordId("#" + checkId(userId)))
       val vtxs = Query.executeQuery(tx, SQL_QUERY, params)
       for (vtxRep <- vtxs) yield {val Report (rep) = vtxRep; rep}
     }.toList

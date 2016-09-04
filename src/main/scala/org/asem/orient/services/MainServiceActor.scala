@@ -75,7 +75,7 @@ class MainServiceActor(val serverConnection: ActorRef) extends HttpServiceActor
     loginRoute
       ~ resourceRoute
       ~ userManagementRoute
-      ~ reportRoute
+//      ~ reportRoute
       ~ taskRoute
       ~ projectRouter
   )

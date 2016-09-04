@@ -41,10 +41,17 @@ Ext.define("PH.controller.App", {
             
             contentPanel.add(cmp);
             cmp.setTitle (PH.utils.CommonUtils.getLocaleString('titles', xtype));
-            
-            var columns = PH.utils.CommonUtils.createColumnFromModel (GLocale, cmp.getStore())
-            cmp.reconfigure(cmp.store, columns);
-            PH.utils.CommonUtils.refreshAnyGrid (cmp)
+            if (cmp.isXType('grid')) {
+                var columns = PH.utils.CommonUtils.createColumnFromModel(GLocale, cmp.getStore())
+                cmp.reconfigure(cmp.store, columns);
+                PH.utils.CommonUtils.refreshAnyGrid(cmp)
+            }
+            else {
+                var grid = cmp.down('grid')
+                var columns = PH.utils.CommonUtils.createColumnFromModel(GLocale, grid.getStore())
+                grid.reconfigure(grid.store, columns);
+                PH.utils.CommonUtils.refreshAnyGrid(grid)
+            }
 
             if (cmp.floating) {
                 cmp.show();
