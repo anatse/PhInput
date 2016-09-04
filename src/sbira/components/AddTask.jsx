@@ -25,8 +25,9 @@ class AddTask extends Component {
         this.setState({content: event.target.value});
     }
 
-    onAddClick = () => {
-        console.log("onAddClick");
+    onAddClick = (e) => {
+        e && e.preventDefault();
+        if (!this.state.name || !this.state.content) return;
         this.props.onAddTask(this.state);
         this.setState({open: false});
     }
@@ -41,7 +42,9 @@ class AddTask extends Component {
 
     render() {
         const {onAddTask} = this.props;
-        const addDisabled = this.state.name && this.state.content? false : true;
+        const addDisabled = this.state.name && this.state.content
+            ? false
+            : true;
         return (
             <div>
                 <div className='add-task-btn'>
@@ -53,14 +56,16 @@ class AddTask extends Component {
                     </Modal.Header>
                     <Modal.Body>
                         <div className='add-task-wrapper'>
-                            <FormGroup controlId="name-input" key={1}>
-                                <ControlLabel>Имя</ControlLabel>
-                                <FormControl type="text" placeholder="Введите имя задачи (1-2 слова)... " value={this.state.name} onChange={this.onChangeName}/>
-                            </FormGroup>
-                            <FormGroup controlId="desc-input" key={2}>
-                                <ControlLabel>Описание</ControlLabel>
-                                <FormControl className='desc-input' componentClass="textarea" placeholder="Введите описание..." value={this.state.content} onChange={this.onChangeContent}/>
-                            </FormGroup>
+                            <form onSubmit={this.onAddClick}>
+                                <FormGroup controlId="name-input" key={1}>
+                                    <ControlLabel>Имя</ControlLabel>
+                                    <FormControl type="text" placeholder="Введите имя задачи (1-2 слова)... " value={this.state.name} onChange={this.onChangeName}/>
+                                </FormGroup>
+                                <FormGroup controlId="desc-input" key={2}>
+                                    <ControlLabel>Описание</ControlLabel>
+                                    <FormControl className='desc-input' componentClass="textarea" placeholder="Введите описание..." value={this.state.content} onChange={this.onChangeContent}/>
+                                </FormGroup>
+                            </form>
                         </div>
                     </Modal.Body>
                     <Modal.Footer>

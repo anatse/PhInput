@@ -12,6 +12,7 @@ class CommentCreator extends Component {
 
     onAddComment = (e) => {
         e && e.preventDefault();
+        if (!this.state.comment) return;
         const {taskId} = this.props;
         const comment = {
             owner: 'user',
