@@ -98,6 +98,8 @@ export const postEditedTask = (task) => {
   return function(dispatch){
 
     dispatch(saveEditedTask())
+    // update task changeDate:
+    task.changeDate = Date.now();
 
     return axios.put('/task/' + task.id , task)
       .then(function (response) {

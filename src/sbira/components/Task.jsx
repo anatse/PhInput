@@ -1,7 +1,15 @@
 import React, {PropTypes} from 'react'
 import statuses, {getClassByStatus, getBtnTxtByStatus} from '../utils/taskStatuses'
 import CommentList from './CommentList'
-import {ButtonToolbar, ButtonGroup, Button, FormGroup, FormControl, ControlLabel} from 'react-bootstrap';
+import {
+    ButtonToolbar,
+    ButtonGroup,
+    Button,
+    FormGroup,
+    FormControl,
+    ControlLabel
+} from 'react-bootstrap';
+import moment from 'moment';
 
 class Task extends React.Component {
 
@@ -18,6 +26,15 @@ class Task extends React.Component {
 
     onSetNextStatus = (status) => {
         this.props.onSetNextStatus(status);
+    }
+
+    dateFormatter = (date) => {
+        moment.locale('ru');
+        const momentDate = moment(date);
+        const isSameDay = momentDate.isSame(Date.now(), 'day');
+        return (isSameDay)
+            ? momentDate.format('Сегодня, HH:mm:ss')
+            : momentDate.format('Do MMMM YYYY, HH:mm:ss');
     }
 
     render() {
@@ -40,20 +57,20 @@ class Task extends React.Component {
                     <span className='name'>{task.name}</span>
                 </div>
                 <div className='content block'>
-                  <FormGroup  >
-                    <ControlLabel>Описание</ControlLabel>
-                    <FormControl componentClass="textarea" placeholder="Введите описание задачи..." value={task.content} onChange={onChangeContent} />
-                  </FormGroup>
+                    <FormGroup >
+                        <ControlLabel>Описание</ControlLabel>
+                        <FormControl componentClass="textarea" placeholder="Введите описание задачи..." value={task.content} onChange={onChangeContent}/>
+                    </FormGroup>
                 </div>
                 <div className='comments block'>
                     <CommentList taskId={task.id} comments={task.comments || []} onAddComment={onAddComment}/>
                 </div>
                 <div className='recent block'>
                     <div className='changed'>Обновлён:
-                        <span>{task.changeDate}</span>
+                        <span>{this.dateFormatter(task.changeDate)}</span>
                     </div>
                     <div className='deadline'>Срок:
-                        <span>{task.deadLine}</span>
+                        <span>{this.dateFormatter(task.deadLine)}</span>
                     </div>
                     <div className='owner'>Ответственный:
                         <span>{task.owner}</span>

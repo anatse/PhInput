@@ -41,6 +41,7 @@ class AddTask extends Component {
 
     render() {
         const {onAddTask} = this.props;
+        const addDisabled = this.state.name && this.state.content? false : true;
         return (
             <div>
                 <div className='add-task-btn'>
@@ -64,7 +65,7 @@ class AddTask extends Component {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button key={1} onClick={this.close}>Закрыть</Button>
-                        <Button key={2} onClick={this.onAddClick}>Добавить</Button>
+                        <Button key={2} onClick={this.onAddClick} disabled={addDisabled}>Добавить</Button>
                     </Modal.Footer>
                 </Modal>
             </div>

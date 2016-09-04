@@ -33,7 +33,7 @@ input, textarea {background: transparent;}
     }
     .comments {position: relative; width: 400px; max-height: 280px; margin: 5px;      .cont{ width:100%; height:100%; padding-bottom:36px;
         .cont-ins { overflow-y: scroll;height:100%; border: 1px solid $borderColor;
-          .comment{ float:left; text-align: left;
+          .comment{ float:left; text-align: left; width:100%;
             .time{font-style: italic;}
             .author{font-weight: bold;font-style: italic; }
             .text{font-style: italic;}

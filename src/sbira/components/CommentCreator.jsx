@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from 'react'
-import {Button, Col, FormControl} from 'react-bootstrap'
+import {Button, Col, FormControl, FormGroup} from 'react-bootstrap'
 
 class CommentCreator extends Component {
 
@@ -23,17 +23,22 @@ class CommentCreator extends Component {
     }
 
     render() {
-        const {taskId, comments, onAddComment} = this.props;
+        const {taskId, onAddComment} = this.props;
+        const addDisabled = this.state.comment
+            ? false
+            : true;
         return (
             <form className='create' onSubmit={this.onAddComment}>
-                <div className='msg'>
-                    <FormControl type="text" placeholder="Введите сообщение..." value={this.state.comment} onChange={(event) => {
-                        this.setState({comment: event.target.value});
-                    }} autoComplete='off'/>
-                </div>
-                <div className='add-comment-btn'>
-                    <Button block onClick={this.onAddComment}>Добавить</Button>
-                </div>
+                <FormGroup>
+                    <div className='msg'>
+                        <FormControl type="text" placeholder="Введите сообщение..." value={this.state.comment} onChange={(event) => {
+                            this.setState({comment: event.target.value});
+                        }} autoComplete='off'/>
+                    </div>
+                    <div className='add-comment-btn'>
+                        <Button block onClick={this.onAddComment} disabled={addDisabled}>Добавить</Button>
+                    </div>
+                </FormGroup>
             </form>
         )
     }
