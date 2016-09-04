@@ -8,12 +8,9 @@
                 "module": "users",
                 "leaf": true
             }, {
-                "name": "groups",
-                "leaf": true
-            }, {
                 "name": "projects",
                 "module": "projects",
-                "leaf": false
+                "leaf": true
             }
         ]
     }, {
