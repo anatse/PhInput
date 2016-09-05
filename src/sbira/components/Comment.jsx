@@ -13,7 +13,7 @@ class Comment extends Component {
         const isSameDay = momentDate.isSame(Date.now(), 'day');
         return (isSameDay)
             ? momentDate.format('HH:mm:ss')
-            : momentDate.format('HH:mm:ss, Do MMMM YYYY');
+            : momentDate.format('DD-MM-YYYY, HH:mm:ss');
     }
 
     render() {
