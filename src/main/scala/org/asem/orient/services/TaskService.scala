@@ -6,7 +6,7 @@ import com.tinkerpop.blueprints.Direction._
 import com.tinkerpop.blueprints.Vertex
 import com.tinkerpop.blueprints.impls.orient.OrientVertex
 import org.asem.orient.Database
-import org.asem.orient.model.entities.{Comment, JacksonJsonSupport, Task}
+import org.asem.orient.model.entities.{Comment, JacksonJsonSupport, Task, EdgeNames}
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
@@ -31,7 +31,7 @@ object TaskService extends BaseDB {
     * @param task task object
     * @return nothing
     */
-  def addTask (task:Task):Task = {
+  def addTask (task:Task, userId:String):Task = {
     Database.getTx(
       tx => {
         val vtx = addVertex("Task", task2map(task)).apply(tx)
@@ -42,14 +42,20 @@ object TaskService extends BaseDB {
     )
   }
 
-  def changeTask (task:Task):Either[Task, String] = {
+  def changeTask (task:Task, userId:String):Either[Task, String] = {
     Database.getTx(
       graph => {
         try {
           graph.getVertex("#" + task.id) match {
             case vtx: OrientVertex => {
+              val oldStatus = vtx.getProperty("status")
               vertexUpdate (vtx, task2map(task))
               vtx.save
+              // add edge between user and task
+              if (task.status == "В работе" && oldStatus != task.status) {
+                vtx.addEdge(EdgeNames.TaskWorker, graph.getVertex("#" + userId))
+              }
+
               graph.commit()
               notifyByWebSocket("TASKS_UPDATED:CHANGED")
               Left(task)
@@ -64,7 +70,7 @@ object TaskService extends BaseDB {
     )
   }
 
-  def deleteTask (taskId: String):Either[String, String] = {
+  def deleteTask (taskId: String, userId:String):Either[String, String] = {
     Database.getTx(
       graph => {
         try {
@@ -85,13 +91,13 @@ object TaskService extends BaseDB {
     )
   }
 
-  def addComment (taskId:String, comment:Comment) = {
+  def addComment (taskId:String, comment:Comment, userId:String) = {
     Database.getTx(
       graph => {
         graph.getVertex("#" + taskId) match {
           case vtx: OrientVertex => {
             val comVtx = addVertex("Comment", Map(
-              "owner" -> comment.owner,
+              "owner" -> graph.getVertex("#" + userId).getProperty[String]("login"),
               "comment" -> comment.comment,
               "createDate" -> comment.createDate
             )).apply(graph)
@@ -125,7 +131,7 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
       user => path("task") {
         entity(as[Task]) {
           task => {
-            val t = TaskService.addTask(task)
+            val t = TaskService.addTask(task, user.id)
             println (t)
             complete {t}
           }
@@ -138,7 +144,7 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
     auth {
       user => path("task" / Segment) {
         reportId => {
-          TaskService.deleteTask(reportId) match {
+          TaskService.deleteTask(reportId, user.id) match {
             case Left(rep) => respondWithStatus(StatusCodes.OK   ) { complete (rep)}
             case Right(s) => respondWithStatus(StatusCodes.InternalServerError) { complete (s) }
           }
@@ -152,7 +158,7 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
       user => path("task" / Segment) {
         reportId => {
           entity(as[Task]) {
-            task => TaskService.changeTask(task) match {
+            task => TaskService.changeTask(task, user.id) match {
               case Left(rep) => respondWithStatus(StatusCodes.OK   ) { complete (rep)}
               case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }
             }
@@ -168,7 +174,7 @@ trait TaskService extends BaseHttpService with JacksonJsonSupport {
         taskId => {
           entity(as[Comment]) {
             comment => {
-              TaskService.addComment(taskId, comment) match {
+              TaskService.addComment(taskId, comment, user.id) match {
                 case Left(com) => respondWithStatus(StatusCodes.OK ) { complete (com)}
                 case Right(s) => respondWithStatus(StatusCodes.Conflict) { complete (s) }
               }

@@ -12,4 +12,5 @@ object EdgeNames {
   val ReportPharm = "ReportPharm"
   val PharmCycle = "PharmCycle"
   val PrjCycleWorker = "PrjCycleWorker"
+  val TaskWorker = "TaskWorker"
 }

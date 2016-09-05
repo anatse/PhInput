@@ -41,6 +41,14 @@ package object entities {
         else
           null
       }
+      
+      def outF(label: String, field:String) = {
+        val vtxs = vtx.getVertices(OUT, label)
+        if (vtxs.iterator().hasNext)
+          vtxs.head.prop[String](field)
+        else
+          ""
+      }
 
       def in(label: String):Vertex = {
         val vtxs = vtx.getVertices(IN, label)
@@ -65,7 +73,7 @@ package object entities {
     def unapply[B <: Vertex](vtx: B): Option[Comment] = if (vtx != null) Some(Comment(id = vtx.id, owner = vtx.prop("owner"), comment = vtx.prop("comment"), createDate = vtx.prop[Date]("createDate"))) else None
   }
 
-  case class Task(id: String, name: String, content: String, comments: Seq[Comment], status: String, assignedPerson: String, changeDate: DateTime, deadLine: DateTime, owner: String) extends BaseEntity
+  case class Task(id: String, name: String, content: String, comments: Seq[Comment], status: String, assignedPerson: String, changeDate: DateTime, deadLine: DateTime, owner: String, worker:String = "") extends BaseEntity
   object Task extends JsonMapper[Task] {
     def unapply(comment: String): Option[Task] = Some(read(comment))
     def unapply[B <: Vertex](vtx: B): Option[Task] = if (vtx != null) Some(
@@ -78,7 +86,8 @@ package object entities {
         assignedPerson = vtx.prop("assignedPerson"),
         changeDate = vtx.prop[Date]("changeDate"),
         deadLine = vtx.prop[Date]("deadLine"),
-        owner = vtx.prop("owner")
+        owner = vtx.prop("owner"),
+        worker = vtx.outF (EdgeNames.TaskWorker, "login")
       ))
       else None
   }
