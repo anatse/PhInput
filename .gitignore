@@ -2,3 +2,6 @@
 target
 node_modules
 .iml
+phinp-mv-1.0-SNAPSHOT.jar
+lib
+KeyStore.jks
