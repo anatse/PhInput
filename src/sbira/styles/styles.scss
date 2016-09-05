@@ -13,12 +13,27 @@ input, textarea {background: transparent;}
 .add-task-wrapper{ width:100%; margin: auto; padding: 4%;
   .desc-input{max-width: 100%; min-height:200px; }
 }
+#filterHint{
+  .txt{
+    margin-bottom: 10px;
+  }
+  .hint{
+    .preview{display: inline-block; width: 20px; height: 20px;
+      &.new { background-color: $new;}
+      &.in-progress { background-color: $inProgress;}
+      &.done { background-color: $done;}
+      &.reopened { background-color: $reopened;}
+      &.closed { background-color: $closed;}
+      }
+      .msg {height: 20px; vertical-align: top; line-height: 20px; }
+  }
+}
 .filter-cont{position: fixed; top:15px; right:15px;
-  .info{margin:5px auto; text-align: center;
+  .info{ margin:5px auto; text-align: center;
     a {font-weight: bold;}
   }
   .filters{
-    .new {
+    .new { background-color: $new;
     label:after{
       background: $new;
       background: linear-gradient(to top, $new 0%, darken($new, 10%) 100%);
@@ -52,7 +67,7 @@ input, textarea {background: transparent;}
   .reopened { color: $reopened; }
   .closed { color: $closed; }
   .add-task-btn{ width:55%; margin: 20px auto;}
-  .task {position: relative; display: inline-block; width:1000px; min-width: 55%; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor;    .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
+  .task {position: relative;   display: -webkit-flex;   display: flex;   flex-direction: row;   width:1000px; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor; -webkit-flex-direction: row; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-around; justify-content: space-around;   .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
       &.new { background-color: $new; }
       &.in-progress { background-color: $inProgress; }
       &.done { background-color: $done; }
@@ -79,7 +94,7 @@ input, textarea {background: transparent;}
         .add-comment-btn{position: absolute; top:2px; right:0;  width:90px; }
       }
     }
-    .recent {float: right; min-width: 200px;  padding: 5px 5px 30px 5px; text-align: right;      .changed,
+    .recent {float: right; width: 250px;  padding: 5px 5px 30px 5px; text-align: right;      .changed,
       .owner,
       .deadline
          { span { font-weight: bold; }

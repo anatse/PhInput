@@ -4,35 +4,35 @@
          className: "new",
          btnText: "Создать",
          next: ['IN_PROGRESS', 'CLOSED'],
-         filterHint: 'Вкл/Выкл фильтрацию новых задач',
+         filterHint: 'Новые',
      },
      IN_PROGRESS: {
          name: "В работе",
          className: "in-progress",
          btnText: "Взять в работу",
          next: ['DONE', 'CLOSED'],
-         filterHint: 'Вкл/Выкл фильтрацию задач в работе',
+         filterHint: 'В работе',
      },
      DONE: {
          name: "Готово",
          className: "done",
          btnText: "Выполнено",
          next: ['REOPENED', 'CLOSED'],
-         filterHint: 'Вкл/Выкл фильтрацию готовых задач',
+         filterHint: 'Готовые',
      },
      REOPENED: {
          name: "Переоткрыт",
          className: "reopened",
          btnText: "Переоткрыть",
          next: ['IN_PROGRESS', 'CLOSED'],
-         filterHint: 'Вкл/Выкл фильтрацию переоткрытых задач',
+         filterHint: 'Переоткрытые',
      },
      CLOSED: {
          name: "Закрыт",
          className: "closed",
          btnText: "Закрыть",
          next: ['REOPENED'],
-         filterHint: 'Вкл/Выкл фильтрацию закрытых задач',
+         filterHint: 'Закрытые',
      }
  };
  export function getStatusesAsArray() {
