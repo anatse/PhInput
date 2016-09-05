@@ -12,13 +12,16 @@ import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
 import scala.collection.JavaConversions._
+import org.asem.Boot.{PushToChildren, service => mainService}
 
 object TaskService extends BaseDB {
   /**
     * Function ertrieves all task from database
-     * @return list of tasks with comments
+    * @return list of tasks with comments
     */
-  def findAllTasks = Database.getTx {tx => val vtxs = tx.getVerticesOfClass("Task"); for {vtx <- vtxs} yield {val Task (task) = vtx;task}}.toList
+  def findAllTasks = Database.getTx {tx => val vtxs = tx.getVerticesOfClass("Task"); for {vtx <- vtxs} yield {val Task (task) = vtx;task}}.toList.sortWith((a:Task,b:Task) => a.changeDate.isAfter(b.changeDate))
+
+  private def notifyByWebSocket (msg:String) = { if (mainService != null) mainService ! PushToChildren(msg) }
 
   private def task2map (task:Task) = Map( "name" -> task.name, "content" -> task.content, "status" -> task.status, "assignedPerson" -> task.assignedPerson,
     "changeDate" -> task.changeDate, "deadLine" -> task.deadLine, "owner" -> task.owner )
@@ -33,6 +36,7 @@ object TaskService extends BaseDB {
       tx => {
         val vtx = addVertex("Task", task2map(task)).apply(tx)
         val Task(ret) = vtx
+        notifyByWebSocket("TASKS_UPDATED:ADDED")
         ret
       }
     )
@@ -47,6 +51,7 @@ object TaskService extends BaseDB {
               vertexUpdate (vtx, task2map(task))
               vtx.save
               graph.commit()
+              notifyByWebSocket("TASKS_UPDATED:CHANGED")
               Left(task)
             }
             case _ => Right("Error updating record: " + "#" + task.id)
@@ -67,6 +72,7 @@ object TaskService extends BaseDB {
             case vtx: OrientVertex => {
               graph.removeVertex(vtx)
               graph.commit()
+              notifyByWebSocket("TASKS_UPDATED:DELETED")
               Left("DELETE SUCCESSFULL")
             }
             case _ => Right("Error deleting record: " + "#" + taskId)
@@ -78,20 +84,21 @@ object TaskService extends BaseDB {
       }
     )
   }
-  
+
   def addComment (taskId:String, comment:Comment) = {
     Database.getTx(
       graph => {
         graph.getVertex("#" + taskId) match {
           case vtx: OrientVertex => {
             val comVtx = addVertex("Comment", Map(
-              "owner" -> comment.owner, 
+              "owner" -> comment.owner,
               "comment" -> comment.comment,
               "createDate" -> comment.createDate
             )).apply(graph)
 
             vtx.addEdge("com", comVtx)
             graph.commit()
+            notifyByWebSocket("TASKS_UPDATED:COMMENT_ADDED")
             Left(comment)
           }
           case _ => Right("Error add comment to task: " + "#" + taskId)
