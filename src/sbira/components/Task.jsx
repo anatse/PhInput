@@ -33,8 +33,8 @@ class Task extends React.Component {
         const momentDate = moment(date);
         const isSameDay = momentDate.isSame(Date.now(), 'day');
         return (isSameDay)
-            ? momentDate.format('Сегодня, HH:mm:ss')
-            : momentDate.format('Do MMMM YYYY, HH:mm:ss');
+            ? momentDate.format('Сегодня в HH:mm:ss')
+            : momentDate.format('Do MMMM YYYY в HH:mm:ss');
     }
 
     render() {
@@ -51,7 +51,7 @@ class Task extends React.Component {
         return (
             <div className='task'>
                 <div className={'status ' + statusClass} title={'Статус:' + task.status}></div>
-                <div className='info'>
+                <div className='info' title={task.id + ': ' + task.name}>
                     <span className='id'>{task.id}:
                     </span>
                     <span className='name'>{task.name}</span>
