@@ -10,6 +10,7 @@ import {
     ControlLabel
 } from 'react-bootstrap';
 import moment from 'moment';
+import UserSelectCont from '../containers/UserSelectCont';
 
 class Task extends React.Component {
 
@@ -82,10 +83,7 @@ class Task extends React.Component {
                             {task.owner}</span>
                     </div>
                     {task.assignedPerson && (
-                        <div className='assigned'>
-                            Ответственный:<span>
-                                {task.assignedPerson}</span>
-                        </div>
+                        <UserSelectCont value={task.assignedPerson} taskId={task.id} />
                     )}
                     {(possibleStatuses.length)
                         ? (

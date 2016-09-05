@@ -3,7 +3,7 @@ var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
 
 var host = 'localhost'; // if you change here - also edit webpack config
-var servicesHost = 'localhost:8080/';
+var backendTarget = 'https://localhost:8080/';
 
 new WebpackDevServer(webpack(config), {
     publicPath: config.output.publicPath,
@@ -16,19 +16,23 @@ new WebpackDevServer(webpack(config), {
     compress: true,
     proxy: {
         '/task/*': {
-            target: 'https://' + servicesHost,
+            target: backendTarget,
             secure:false
         },
         '/pub/*': {
-            target: 'https://' + servicesHost,
+            target: backendTarget,
             secure:false
         },
         '/login/*': {
-            target: 'https://' + servicesHost,
+            target: backendTarget,
             secure:false
         },
         '/project/*': {
-            target: 'https://' + servicesHost,
+            target: backendTarget,
+            secure:false
+        },
+        '/user/*': {
+            target: backendTarget,
             secure:false
         }
     }

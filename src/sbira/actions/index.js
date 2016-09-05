@@ -15,6 +15,39 @@ export const clearVisibilityFilter = () => {
   }
 }
 
+
+/******************************** GETTING USERS ********************************/
+export const receiveUsersOk = (users) => {
+  return {
+    type: 'RECEIVE_USERS_OK',
+    receivedAt: new Date(),
+    users
+  }
+}
+
+export const receiveUsersErr = (users) => {
+  return {
+    type: 'RECEIVE_USERS_ERR',
+    receivedAt: new Date(),
+    users
+  }
+}
+export const getUsersList = () => {
+
+  return function (dispatch) {
+    let axiosPromise = axios.get('/user', {params:{antiCache:Date.now()}});
+    axiosPromise.then(response => {
+        // console.log(response);
+        dispatch(receiveUsersOk(response.data))
+      })
+      .catch( error => {
+        console.log(error);
+        dispatch(receiveUsersErr(error))
+      });
+    return axiosPromise;
+  }
+}
+
 /*************************** REQUESTING AND RECEIVING TASKS ***************************/
 export const requestTasks = () => {
   return {

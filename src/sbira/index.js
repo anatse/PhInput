@@ -7,6 +7,7 @@ import {initWebSocket, addOnMessage} from './websocket'
 import configureStore from './store/configureStore'
 import {fetchTasks} from './actions'
 
+// import reactBootstrapCss from './styles/bootstrap.min.css';
 import stylesCss from './styles/styles.scss';
 
 window.addEventListener("load", initWebSocket, false);

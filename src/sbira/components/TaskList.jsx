@@ -11,9 +11,9 @@ class TaskList extends Component {
     }
 
     componentWillMount() {
-        const {fetchTasks} = this.props;
-        console.log("componentWillMount @ Tasks");
-        fetchTasks();
+        const {fetchTasks, getUsersList} = this.props;
+        // FIXME: have to init user list first, so we can render selects in task.
+        getUsersList().then(fetchTasks());
     }
 
     render() {
@@ -30,6 +30,7 @@ class TaskList extends Component {
                     const newValue = event.target.value;
                     onChange(task.id, {content: newValue});
                   }}
+                  
                   onSaveTask={() => {
                     onSaveTask(task);
                   }}
@@ -51,7 +52,9 @@ class TaskList extends Component {
 
 TaskList.propTypes = {
     tasks: PropTypes.array.isRequired,
-    isLoading: PropTypes.bool.isRequired
+    isLoading: PropTypes.bool.isRequired,
+    getUsersList: PropTypes.func.isRequired,
+    fetchTasks: PropTypes.func.isRequired,
 }
 
 export default TaskList

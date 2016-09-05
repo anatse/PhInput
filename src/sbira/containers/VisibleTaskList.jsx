@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 // import { toggleTodo } from '../actions'
 import TaskList from '../components/TaskList'
-import { fetchTasks, editTask, postEditedTask, postNewTask, initDeleteTask, saveComment} from '../actions'
+import { fetchTasks, getUsersList, editTask, postEditedTask, postNewTask, initDeleteTask, saveComment} from '../actions'
 
 const filterTasks = (tasks, filters) => {
   return tasks.filter(t => {
@@ -32,6 +32,7 @@ const VisibleTaskList = connect(
   ,
   {
     fetchTasks,
+    getUsersList,
     onChange: (id, editedTask) => {
       return function(dispatch){
           dispatch(editTask(id, editedTask))
