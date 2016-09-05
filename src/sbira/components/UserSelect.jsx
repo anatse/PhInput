@@ -20,6 +20,8 @@ class UserSelect extends Component {
               options={options}
               onChange={onChange || noop}
               clearable={false}
+              noResultsText={'Ничего не найдено'}
+              placeholder={'Выберите...'}
           />
         )
 
@@ -27,7 +29,7 @@ class UserSelect extends Component {
 
 }
 UserSelect.propTypes = {
-    value: PropTypes.any.isRequired,
+    value: PropTypes.any,
     options: PropTypes.array.isRequired,
     onChange: PropTypes.func,
     taskId: PropTypes.string

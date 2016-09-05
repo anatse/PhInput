@@ -81,9 +81,10 @@ input, textarea {background: transparent;}
     }
     .recent {float: right; min-width: 200px;  padding: 5px 5px 30px 5px; text-align: right;      .changed,
       .owner,
-      .deadline,
-      .assigned { span { font-weight: bold; }
+      .deadline
+         { span { font-weight: bold; }
       }
+      .assigned { }
       .Select {margin-top:10px;text-align: left; }
     }
     .btn-cont{ position: absolute; right: 0px; bottom: 0px; }
