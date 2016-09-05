@@ -82,9 +82,12 @@ class Task extends React.Component {
                         <span>
                             {task.owner}</span>
                     </div>
-                    {task.assignedPerson && (
+                    {/* {task.assignedPerson && ( */}
+                    <div className='assigned'>
+                      <div className='assigned-label'>Ответственный:</div>
                         <UserSelectCont value={task.assignedPerson} taskId={task.id} />
-                    )}
+                    {/* )} */}
+                    </div>
                     {(possibleStatuses.length)
                         ? (
                             <div className='progress-toolbar'>

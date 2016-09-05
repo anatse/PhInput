@@ -5,12 +5,12 @@ class FilterInfo extends Component {
     constructor(props) {
         super(props)
     }
-
+    
     render() {
         const {shownAmount, totalAmount, onClick} = this.props;
         return (
             <div className='info'>
-                Показано: {shownAmount} из {totalAmount} <br/>
+                Выбрано {shownAmount} из {totalAmount} <br/>
                 {(shownAmount < totalAmount) &&
                   <a href="#" title='Нажмите, чтобы показать все' onClick={e => {
                       e.preventDefault();
