@@ -19,7 +19,8 @@ export function addOnOpen(callback) {
     return {
         remove: () => {
             const index = onOpen.indexOf(callback)
-            return onOpen.splice(index, index + 1);
+            onOpen.splice(index,  1);
+            return onOpen;
         }
     }
 }
@@ -28,7 +29,8 @@ export function addOnMessage(callback) {
     return {
         remove: () => {
             const index = onMessage.indexOf(callback)
-            return onMessage.splice(index, index + 1);
+            onMessage.splice(index, 1);
+            return onMessage;
         }
     }
 }
@@ -37,7 +39,8 @@ export function addOnError(callback) {
     return {
         remove: () => {
             const index = onError.indexOf(callback)
-            return onError.splice(index, index + 1);
+            onError.splice(index, 1);
+            return onError;
         }
     }
 }
@@ -46,7 +49,8 @@ export function addOnClose(callback) {
     return {
         remove: () => {
             const index = onClose.indexOf(callback)
-            return onClose.splice(index, index + 1);
+            onClose.splice(index, 1);
+            return onClose;
         }
     }
 }

@@ -1,15 +1,7 @@
 import axios from 'axios';
 import statuses from '../utils/taskStatuses'
 
-let nextTodoId = 0
-export const addTodo = (text) => {
-  return {
-    type: 'ADD_TODO',
-    id: nextTodoId++,
-    text
-  }
-}
-
+/******************************** FILTERING TASKS ********************************/
 export const toggleVisibilityFilter = (filter) => {
   return {
     type: 'TOGGLE_VISIBILITY_FILTER',
@@ -17,12 +9,12 @@ export const toggleVisibilityFilter = (filter) => {
   }
 }
 
-export const toggleTodo = (id) => {
+export const clearVisibilityFilter = () => {
   return {
-    type: 'TOGGLE_TODO',
-    id
+    type: 'CLEAR_VISIBILITY_FILTER',
   }
 }
+
 /*************************** REQUESTING AND RECEIVING TASKS ***************************/
 export const requestTasks = () => {
   return {

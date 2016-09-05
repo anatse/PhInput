@@ -3,8 +3,9 @@ import { toggleVisibilityFilter } from '../actions'
 import Link from '../components/Link'
 
 const mapStateToProps = (state, ownProps) => {
+  const index = state.visibilityFilter.indexOf(ownProps.filter);
   return {
-    active: ownProps.filter === state.visibilityFilter
+    active:  (index>=0)
   }
 }
 

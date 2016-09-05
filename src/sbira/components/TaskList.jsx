@@ -3,7 +3,6 @@ import Task from './Task'
 import AddTask from './AddTask'
 import StatusInformer from './StatusInformer'
 import { getNext } from '../utils/taskStatuses'
-import FilterList from './FilterList'
 
 class TaskList extends Component {
 

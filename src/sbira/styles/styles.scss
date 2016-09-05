@@ -20,13 +20,37 @@ input, textarea {background: transparent;}
 .add-task-wrapper{ width:100%; margin: auto; padding: 4%;
   .desc-input{max-width: 100%; min-height:200px; }
 }
-.filter{position: fixed; top:15px; right:15px;
-  .link { width:20px;height:20px; display:inline-block;}
-  .new { background-color: $new; }
-  .in-progress { background-color: $inProgress; }
-  .done { background-color: $done; }
-  .reopened { background-color: $reopened; }
-  .closed { background-color: $closed; }
+.filter-cont{position: fixed; top:15px; right:15px;
+  .info{margin:5px auto; text-align: center;
+    a {font-weight: bold;}
+  }
+  .filters{
+    .new {
+    label:after{
+      background: $new;
+      background: linear-gradient(to top, $new 0%, darken($new, 10%) 100%);
+    }}
+    .in-progress { background-color: $inProgress;
+      label:after{
+        background: $inProgress;
+        background: linear-gradient(to top, $inProgress 0%, darken($inProgress, 10%) 100%);
+    }}
+    .done { background-color: $done;
+      label:after{
+        background: $done;
+        background: linear-gradient(to top, $done 0%, darken($done, 10%) 100%);
+    }}
+    .reopened { background-color: $reopened;
+      label:after{
+        background: $reopened;
+        background: linear-gradient(to top, $reopened 0%, darken($reopened, 10%) 100%);
+    }}
+    .closed { background-color: $closed;
+      label:after{
+        background: $closed;
+        background: linear-gradient(to top, $closed 0%, darken($closed, 10%) 100%);
+    }}
+  }
 }
 .tasks { text-align: center;
   .new { color: $new; }
@@ -35,14 +59,14 @@ input, textarea {background: transparent;}
   .reopened { color: $reopened; }
   .closed { color: $closed; }
   .add-task-btn{ width:55%; margin: 20px auto;}
-  .task {position: relative; display: inline-block; min-width: 55%; min-width:1000px; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor;    .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
+  .task {position: relative; display: inline-block; width:1000px; min-width: 55%; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor;    .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
       &.new { background-color: $new; }
       &.in-progress { background-color: $inProgress; }
       &.done { background-color: $done; }
       &.reopened { background-color: $reopened; }
       &.closed { background-color: $closed; }
     }
-    .info { position: absolute; top: -26px; left: 0; overflow: hidden; width: 200px; height: 20px; padding: 3px; white-space: nowrap; text-overflow: ellipsis;  border-width: 1px 1px 0 1px; border-style: dashed; border-color: $borderColor; background: $bgcolor;
+    .info { position: absolute; top: -26px; left: 0; overflow: hidden; width: 200px; height: 20px; padding: 3px; text-align: left;white-space: nowrap; text-overflow: ellipsis;  border-width: 1px 1px 0 1px; border-style: dashed; border-color: $borderColor; background: $bgcolor;
       .id { font-weight: bold; }
       .name { }
     }
@@ -64,10 +88,11 @@ input, textarea {background: transparent;}
         .add-comment-btn{position: absolute; top:2px; right:0;  width:90px; }
       }
     }
-    .recent {min-width: 200px;  padding: 5px 5px 30px 5px; text-align: right;
+    .recent {float: right;min-width: 200px;  padding: 5px 5px 30px 5px; text-align: right;
       .changed,
       .owner,
-      .deadline { span { font-weight: bold; }
+      .deadline,
+      .assigned { span { font-weight: bold; }
       }
     }
     .btn-cont{ position: absolute; right: 0px; bottom: 0px; }
@@ -78,3 +103,61 @@ input, textarea {background: transparent;}
     }
   }
 }
+
+/* .squareCheckbox */
+$activeColor: #27ae60; //green
+$darkenColor: darken($activeColor, 10%);
+.squareCheckbox {
+  position: relative;
+
+  display: inline-block;
+
+  width: 28px;
+  height: 28px;
+  margin: 0px auto;
+
+  background: #fcfff4;
+  background: linear-gradient(to top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+  // border-radius: 50px;
+  box-shadow: inset 0px 1px 1px white, 0px 1px 3px rgba(0,0,0,0.5);
+  label {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+
+    width: 20px;
+    height: 20px;
+
+    cursor: pointer;
+
+    background: linear-gradient(to top, #222 0%, #45484d 100%);
+    // border-radius: 50px;
+    box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,1);
+    &:after {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+
+      width: 16px;
+      height: 16px;
+
+      content: '';
+
+      opacity: 0;
+      background: $activeColor;
+      background: linear-gradient(to top, $activeColor 0%, $darkenColor 100%);
+      // border-radius: 50px;
+      box-shadow: inset 0px 1px 1px white, 0px 1px 3px rgba(0,0,0,0.5);
+    }
+    &:hover::after {
+      opacity: 0.3;
+    }
+  }
+  input[type=checkbox] {
+    visibility: hidden;
+    &:checked + label:after {
+      opacity: 1;
+    }
+  }
+}
+/* end .squareCheckbox */

@@ -3,16 +3,12 @@ import { connect } from 'react-redux'
 import TaskList from '../components/TaskList'
 import { fetchTasks, editTask, postEditedTask, postNewTask, initDeleteTask, saveComment} from '../actions'
 
-const filterTasks = (tasks, filter) => {
-  // switch (filter) {
-  //   case 'SHOW_ALL':
-  //     return tasks
-  //   case 'SHOW_COMPLETED':
-  //     return tasks.filter(t => t.completed)
-  //   case 'SHOW_ACTIVE':
-  //     return tasks.filter(t => !t.completed)
-  // }
-  return tasks;
+const filterTasks = (tasks, filters) => {
+  return tasks.filter(t => {
+    return filters.some( f =>{
+      return t.status == f.name
+    })
+  })
 }
 
 const mapStateToProps = (state) => {
