@@ -1,5 +1,6 @@
 package org.asem.orient.services
 
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException
 import com.tinkerpop.blueprints.impls.orient.{OrientGraph, OrientVertex}
 import org.asem.orient.model.PhUser
 import org.asem.orient.{Database, Query}
@@ -24,18 +25,26 @@ object PhUserService extends BaseDB {
   /**
     * Function create user record in database
     */
-  def createUser(user: PhUser): Unit = {
-    Database.getTx(
-      addVertex("PhUser",
-        Map("login" -> user.login,
-          "password" -> user.pwdHash,
-          "email" -> user.email,
-          "firstName" -> user.firstName,
-          "secondName" -> user.secondName,
-          "activated" -> user.activated,
-          "manager" -> user.manager)
+  def createUser(user: PhUser): Either[String, PhUser] = {
+    try {
+      Database.getTx(
+        tx => {
+          val vtx = addVertex("PhUser",
+            Map("login" -> user.login,
+              "password" -> user.pwdHash,
+              "email" -> user.email,
+              "firstName" -> user.firstName,
+              "secondName" -> user.secondName,
+              "activated" -> user.activated,
+              "manager" -> user.manager)
+          )(tx)
+          Right(user)
+        }
       )
-    )
+    }
+    catch {
+      case ex:ORecordDuplicatedException => Left("duplicate")
+    }
   }
 
   /**
@@ -180,8 +189,10 @@ trait PhUserService extends BaseHttpService {
              respondWithStatus(StatusCodes.BadRequest) { complete("{sucess: false, message: 'Email should be provided'}") }
            }
            else {
-             PhUserService.createUser(newUser)
-             respondWithStatus(StatusCodes.Created) { complete("{success: true, message: 'OK'}") }
+             PhUserService.createUser(newUser) match {
+               case Right(user) => respondWithStatus(StatusCodes.Created) {complete(s"{success: true, message: 'OK'}")}
+               case Left(error) => respondWithStatus(StatusCodes.Conflict) {complete(s"{success: false, message: ${error}}")}
+             }
            }
          }
        }

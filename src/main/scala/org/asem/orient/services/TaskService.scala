@@ -48,7 +48,7 @@ object TaskService extends BaseDB {
         try {
           graph.getVertex("#" + task.id) match {
             case vtx: OrientVertex => {
-              val oldStatus = vtx.getProperty("status")
+              val oldStatus:String = vtx.getProperty("status")
               if (task.status == "В работе" && oldStatus != task.status) {
                 val asp = graph.getVertex("#" + userId).getProperty[String]("login")
                 vertexUpdate (vtx, task2map(task.copy(assignedPerson = asp)))
@@ -57,9 +57,6 @@ object TaskService extends BaseDB {
                 vertexUpdate (vtx, task2map(task))
               
               vtx.save
-              // add edge between user and task
-              
-
               graph.commit()
               notifyByWebSocket("TASKS_UPDATED:CHANGED")
               Left(task)
