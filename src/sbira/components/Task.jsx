@@ -7,7 +7,9 @@ import {
     Button,
     FormGroup,
     FormControl,
-    ControlLabel
+    ControlLabel,
+    ListGroup,
+    ListGroupItem
 } from 'react-bootstrap';
 import moment from 'moment';
 import UserSelectCont from '../containers/UserSelectCont';
@@ -68,27 +70,35 @@ class Task extends React.Component {
                     <CommentList taskId={task.id} comments={task.comments || []} onAddComment={onAddComment}/>
                 </div>
                 <div className='recent block'>
-                    <div className='changed'>
-                        Обновлён:
-                        <span>
-                            {this.dateFormatter(task.changeDate)}</span>
-                    </div>
-                    <div className='deadline'>
-                        Срок:
-                        <span>
-                            {this.dateFormatter(task.deadLine)}</span>
-                    </div>
-                    <div className='owner'>
-                        Автор:
-                        <span>
-                            {task.owner}</span>
-                    </div>
-                    {/* {task.assignedPerson && ( */}
-                    <div className='assigned'>
-                      <div className='assigned-label'>Ответственный:</div>
-                        <UserSelectCont value={task.assignedPerson} taskId={task.id} />
-                    {/* )} */}
-                    </div>
+                    <ListGroup>
+                        <ListGroupItem>
+                            <div className='changed'>
+                                Обновлён:
+                                <span>
+                                    {this.dateFormatter(task.changeDate)}</span>
+                            </div>
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            <div className='deadline'>
+                                Срок:
+                                <span>
+                                    {this.dateFormatter(task.deadLine)}</span>
+                            </div>
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            <div className='owner'>
+                                Автор:
+                                <span>
+                                    {task.owner}</span>
+                            </div>
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            <div className='assigned'>
+                                <div className='assigned-label'>Ответственный:</div>
+                                <UserSelectCont value={task.assignedPerson} taskId={task.id}/>
+                            </div>
+                        </ListGroupItem>
+                    </ListGroup>
                     {(possibleStatuses.length)
                         ? (
                             <div className='progress-toolbar'>
