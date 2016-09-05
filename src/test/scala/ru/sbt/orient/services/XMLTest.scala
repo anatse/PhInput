@@ -64,7 +64,7 @@ class XMLTest extends FlatSpec with Matchers {
 
   val user = PhUser(login = "demo", password = "demo", email = "demo@demo.org", firstName = "firstname", secondName = "secondName")
   "PhUser" should "be printed to string" in {
-    user.toString should be ("demo,demo@demo.org,firstname,secondName,false")
+    user.toString should be ("demo,demo@demo.org,firstname,secondName,false,")
   }
 
   it should "be unapplied from string" in {

@@ -10,9 +10,9 @@ export const addTodo = (text) => {
   }
 }
 
-export const setVisibilityFilter = (filter) => {
+export const toggleVisibilityFilter = (filter) => {
   return {
-    type: 'SET_VISIBILITY_FILTER',
+    type: 'TOGGLE_VISIBILITY_FILTER',
     filter
   }
 }

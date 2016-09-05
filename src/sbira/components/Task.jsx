@@ -66,14 +66,14 @@ class Task extends React.Component {
                     <CommentList taskId={task.id} comments={task.comments || []} onAddComment={onAddComment}/>
                 </div>
                 <div className='recent block'>
-                    <div className='changed'>Обновлён:
-                        <span>{this.dateFormatter(task.changeDate)}</span>
+                    <div className='changed'> Обновлён: 
+                        <span> {this.dateFormatter(task.changeDate)}</span>
                     </div>
-                    <div className='deadline'>Срок:
-                        <span>{this.dateFormatter(task.deadLine)}</span>
+                    <div className='deadline'> Срок:
+                        <span> {this.dateFormatter(task.deadLine)}</span>
                     </div>
-                    <div className='owner'>Ответственный:
-                        <span>{task.owner}</span>
+                    <div className='owner'> Ответственный:
+                        <span> {task.owner}</span>
                     </div>
 
                     {(possibleStatuses.length)

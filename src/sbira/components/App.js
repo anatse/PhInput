@@ -1,11 +1,10 @@
 import React from 'react'
-import Footer from './Footer'
-import AddTodo from '../containers/AddTodo'
-import VisibleTodoList from '../containers/VisibleTodoList'
 import VisibleTaskList from '../containers/VisibleTaskList';
+import FilterList from '../components/FilterList';
 
 const App = () => (
   <div>
+    <FilterList />
     <VisibleTaskList />
   </div>
 )
@@ -13,15 +12,10 @@ const App = () => (
 /*
 
 TODO list:
- - add comments chat
- - fix loading state
  - add common chat on the left/right
  - add websocket support
  - allow screenshots / files attaching
+ 
 */
-
-/* <Footer />
-<AddTodo />
-<VisibleTodoList /> */
 
 export default App

@@ -7,9 +7,7 @@
     "lint": "eslint src",
     "packit": "webpack --progress --colors",
     "dev": "webpack-dev-server --progress --colors",
-    "build": "webpack --progress --verbose --colors --display-error-details --config webpack.prod.config.js",
-    "test": "cross-env NODE_ENV=test mocha --recursive --compilers js:babel-register --require ./test/setup.js",
-    "test:watch": "npm test -- --watch"
+    "build": "webpack --progress --verbose --colors --display-error-details --config webpack.prod.config.js"
   },
   "repository": {
     "type": "git",

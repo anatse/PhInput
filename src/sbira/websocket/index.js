@@ -1,8 +1,10 @@
 let wsUri
-if (document.location.host.indexOf('localhost')>=0){
-  wsUri = "wss://localhost:8080/";
-}else {
-  wsUri = "wss://" + document.location.host + "/";
+    // let wsProtocol = (document.location.protocol=='http:')? 'ws://' : 'wss://';
+let wsProtocol = 'wss://';
+if (document.location.host.indexOf('localhost') >= 0) {
+    wsUri = wsProtocol + "localhost:8080/";
+} else {
+    wsUri = wsProtocol + document.location.host + "/";
 }
 
 let websocket = new WebSocket(wsUri);
@@ -13,60 +15,60 @@ let onError = [];
 let onClose = [];
 
 export function addOnOpen(callback) {
-  onOpen.push(callback);
-  return {
-    remove: () => {
-      const index = onOpen.indexOf(callback)
-      return onOpen.splice(index,index+1);
+    onOpen.push(callback);
+    return {
+        remove: () => {
+            const index = onOpen.indexOf(callback)
+            return onOpen.splice(index, index + 1);
+        }
     }
-  }
 }
 export function addOnMessage(callback) {
-  onMessage.push(callback);
-  return {
-    remove: () => {
-      const index = onMessage.indexOf(callback)
-      return onMessage.splice(index,index+1);
+    onMessage.push(callback);
+    return {
+        remove: () => {
+            const index = onMessage.indexOf(callback)
+            return onMessage.splice(index, index + 1);
+        }
     }
-  }
 }
 export function addOnError(callback) {
-  onError.push(callback);
-  return {
-    remove: () => {
-      const index = onError.indexOf(callback)
-      return onError.splice(index,index+1);
+    onError.push(callback);
+    return {
+        remove: () => {
+            const index = onError.indexOf(callback)
+            return onError.splice(index, index + 1);
+        }
     }
-  }
 }
 export function addOnClose(callback) {
-  onClose.push(callback);
-  return {
-    remove: () => {
-      const index = onClose.indexOf(callback)
-      return onClose.splice(index,index+1);
+    onClose.push(callback);
+    return {
+        remove: () => {
+            const index = onClose.indexOf(callback)
+            return onClose.splice(index, index + 1);
+        }
     }
-  }
 }
 export function initWebSocket() {
     websocket.onopen = function(evt) {
         onOpen.forEach((callback) => {
-          callback(evt);
+            callback(evt);
         })
     };
     websocket.onclose = function(evt) {
         onClose.forEach((callback) => {
-          callback(evt);
+            callback(evt);
         })
     };
     websocket.onmessage = function(evt) {
         onMessage.forEach((callback) => {
-          callback(evt);
+            callback(evt);
         })
     };
     websocket.onerror = function(evt) {
         onError.forEach((callback) => {
-          callback(evt);
+            callback(evt);
         })
     };
 }
@@ -97,9 +99,9 @@ export function doSend(message) {
 }
 
 export default {
-  init : initWebSocket,
-  addOnOpen: addOnOpen,
-  addOnClose: addOnClose,
-  addOnMessage: addOnMessage,
-  addOnError: addOnError
+    init: initWebSocket,
+    addOnOpen: addOnOpen,
+    addOnClose: addOnClose,
+    addOnMessage: addOnMessage,
+    addOnError: addOnError
 }

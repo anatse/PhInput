@@ -26,6 +26,10 @@ new WebpackDevServer(webpack(config), {
         '/login/*': {
             target: 'https://' + servicesHost,
             secure:false
+        },
+        '/project/*': {
+            target: 'https://' + servicesHost,
+            secure:false
         }
     }
 }).listen(80, host, function(err, result) {

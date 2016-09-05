@@ -3,6 +3,7 @@ import Task from './Task'
 import AddTask from './AddTask'
 import StatusInformer from './StatusInformer'
 import { getNext } from '../utils/taskStatuses'
+import FilterList from './FilterList'
 
 class TaskList extends Component {
 
@@ -18,9 +19,6 @@ class TaskList extends Component {
 
     render() {
         const {isLoading, lastUpdate, tasks, onChange, onSaveTask, onAddTask, onDelTask, onAddComment} = this.props;
-        // if (isLoading) {
-        //     return <h3 className="loading-msg">Загрузка...</h3>
-        // }
         return (
           <div>
             <StatusInformer isLoading={isLoading} lastUpdate={lastUpdate}/>
