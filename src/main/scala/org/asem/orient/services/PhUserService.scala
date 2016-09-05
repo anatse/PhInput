@@ -191,7 +191,7 @@ trait PhUserService extends BaseHttpService {
            else {
              PhUserService.createUser(newUser) match {
                case Right(user) => respondWithStatus(StatusCodes.Created) {complete(s"{success: true, message: 'OK'}")}
-               case Left(error) => respondWithStatus(StatusCodes.Conflict) {complete(s"{success: false, message: ${error}}")}
+               case Left(error) => respondWithStatus(StatusCodes.Conflict) {complete(s"{success: false, message: '${error}}'")}
              }
            }
          }
