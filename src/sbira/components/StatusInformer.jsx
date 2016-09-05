@@ -28,7 +28,8 @@ class StatusInformer extends Component {
 }
 
 StatusInformer.propTypes = {
-    isLoading: PropTypes.bool.isRequired
+    isLoading: PropTypes.bool.isRequired,
+    lastUpdate: PropTypes.object,
 }
 
 export default StatusInformer

@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import statuses, {getClassByStatus, getBtnTxtByStatus} from '../utils/taskStatuses'
+import statuses, {getStatusByName} from '../utils/taskStatuses'
 import CommentList from './CommentList'
 import {
     ButtonToolbar,
@@ -48,7 +48,8 @@ class Task extends React.Component {
             possibleStatuses,
             onAddComment
         } = this.props;
-        const statusClass = getClassByStatus(task.status);
+        const status = getStatusByName(task.status);
+        const statusClass = status.className;
         return (
             <div className='task'>
                 <div className={'status ' + statusClass} title={'Статус:' + task.status}></div>
@@ -95,9 +96,9 @@ class Task extends React.Component {
                                     <ButtonGroup bsSize="small">
                                         {possibleStatuses.map(function(possibleStatus, index) {
                                             return (
-                                                <Button key={index} className={getClassByStatus(possibleStatus.name)} onClick={() => {
-                                                    onSetNextStatus(possibleStatus.name)
-                                                }}>{getBtnTxtByStatus(possibleStatus.name)}</Button>
+                                                <Button key={index} className={possibleStatus.className} onClick={() => {
+                                                    onSetNextStatus(possibleStatus)
+                                                }}>{possibleStatus.btnText}</Button>
                                             )
                                         })}
                                     </ButtonGroup>

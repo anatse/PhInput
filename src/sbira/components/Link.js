@@ -1,15 +1,16 @@
 import React, { PropTypes } from 'react'
 
-const Link = ({ active, onClick, className, title }) => {
+const Link = ({ active, onClick, title , statusClass }) => {
     return (
-    <div title={title} className={className + ' squareCheckbox ' + (active && 'active')} onClick={e => {
+    <div className={'link ' + statusClass + ' ' + (active && ' active')} onClick={e => {
       e.preventDefault()
       onClick()
     }}>
-      <input type="checkbox" value="none" checked={active} onChange={e => {
-        e.preventDefault()
-      }} />
-      <label htmlFor="squareCheckbox"></label>
+      <div className='squareCheckbox' >
+        <input type="checkbox" value="none" checked={active} onChange={e => {e.preventDefault()}} />
+        <label htmlFor="squareCheckbox"></label>
+      </div>
+      <span className='title'> - {title}</span>
     </div>
   )
 }
@@ -17,7 +18,7 @@ const Link = ({ active, onClick, className, title }) => {
 Link.propTypes = {
   active: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
-  className: PropTypes.string.isRequired,
+  statusClass: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
 }
 

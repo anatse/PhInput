@@ -17,12 +17,11 @@ class TaskList extends Component {
     }
 
     render() {
-        const {isLoading, lastUpdate, tasks, onChange, onSaveTask, onAddTask, onDelTask, onAddComment} = this.props;
+        const {tasks, onChange, onSaveTask, onAddTask, onDelTask, onAddComment} = this.props;
         return (
           <div>
-            <StatusInformer isLoading={isLoading} lastUpdate={lastUpdate}/>
             <div className='tasks'>
-                <AddTask onAddTask={onAddTask} isLoading={isLoading} />
+                <AddTask onAddTask={onAddTask} />
                 {tasks.map(task => <Task
                   key={task.id} task={task}
                   onAddComment={onAddComment}
@@ -30,7 +29,7 @@ class TaskList extends Component {
                     const newValue = event.target.value;
                     onChange(task.id, {content: newValue});
                   }}
-                  
+
                   onSaveTask={() => {
                     onSaveTask(task);
                   }}
@@ -38,7 +37,7 @@ class TaskList extends Component {
                     onDelTask(task.id);
                   }}
                   onSetNextStatus={(status)=>{
-                    onChange(task.id, {status: status});
+                    onChange(task.id, {status: status.name});
                   }}
                   possibleStatuses={getNext(task.status)}
                   />
@@ -52,7 +51,6 @@ class TaskList extends Component {
 
 TaskList.propTypes = {
     tasks: PropTypes.array.isRequired,
-    isLoading: PropTypes.bool.isRequired,
     getUsersList: PropTypes.func.isRequired,
     fetchTasks: PropTypes.func.isRequired,
 }

@@ -44,13 +44,6 @@
      }
      return arr;
  }
- export function getClassByStatus(statusName) {
-     if (!statusName) return;
-     for (let key in statuses) {
-         const currentKey = statuses[key];
-         if (currentKey.name.toLowerCase() == statusName.toLowerCase()) return currentKey.className;
-     }
- }
  export function getNext(statusName) {
      if (!statusName) return;
      let found = false;
@@ -63,10 +56,11 @@
          }
      }
  }
- export function getBtnTxtByStatus(statusName) {
+ export function getStatusByName(statusName) {
+     if (!statusName) return;
      for (let key in statuses) {
          const currentKey = statuses[key];
-         if (currentKey.name.toLowerCase() == statusName.toLowerCase()) return currentKey.btnText;
+         if (currentKey.name.toLowerCase() == statusName.toLowerCase()) return currentKey;
      }
  }
  export default statuses;

@@ -23,9 +23,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const FilterLink = connect(
+const UserSelectCont = connect(
   mapStateToProps,
   mapDispatchToProps
 )(UserSelect)
 
-export default FilterLink
+export default UserSelectCont

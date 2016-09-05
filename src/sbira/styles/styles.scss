@@ -13,51 +13,66 @@ input, textarea {background: transparent;}
 .add-task-wrapper{ width:100%; margin: auto; padding: 4%;
   .desc-input{max-width: 100%; min-height:200px; }
 }
-#filterHint{
-  .txt{
-    margin-bottom: 10px;
-  }
-  .hint{
-    .preview{display: inline-block; width: 20px; height: 20px;
-      &.new { background-color: $new;}
-      &.in-progress { background-color: $inProgress;}
-      &.done { background-color: $done;}
-      &.reopened { background-color: $reopened;}
-      &.closed { background-color: $closed;}
-      }
-      .msg {height: 20px; vertical-align: top; line-height: 20px; }
-  }
-}
 .filter-cont{position: fixed; top:15px; right:15px;
   .info{ margin:5px auto; text-align: center;
     a {font-weight: bold;}
   }
   .filters{
-    .new { background-color: $new;
-    label:after{
-      background: $new;
-      background: linear-gradient(to top, $new 0%, darken($new, 10%) 100%);
-    }}
-    .in-progress { background-color: $inProgress;
-      label:after{
-        background: $inProgress;
-        background: linear-gradient(to top, $inProgress 0%, darken($inProgress, 10%) 100%);
-    }}
-    .done { background-color: $done;
-      label:after{
-        background: $done;
-        background: linear-gradient(to top, $done 0%, darken($done, 10%) 100%);
-    }}
-    .reopened { background-color: $reopened;
-      label:after{
-        background: $reopened;
-        background: linear-gradient(to top, $reopened 0%, darken($reopened, 10%) 100%);
-    }}
-    .closed { background-color: $closed;
-      label:after{
-        background: $closed;
-        background: linear-gradient(to top, $closed 0%, darken($closed, 10%) 100%);
-    }}
+    .link{ cursor: pointer; vertical-align: middle;
+      .title { height:28px;line-height: 28px; display: inline-block; vertical-align: middle;}
+      &.new {
+        .title { color: $new; }
+        .squareCheckbox{ background-color: $new;
+          label:after{
+            background: $new;
+            background: linear-gradient(to top, $new 0%, darken($new, 10%) 100%);
+          }
+        }
+      }
+      &.in-progress {
+        .title { color: $inProgress; }
+        .squareCheckbox{ background-color: $inProgress; color:$inProgress;
+          label:after{
+            background: $inProgress;
+            background: linear-gradient(to top, $inProgress 0%, darken($inProgress, 10%) 100%);
+          }
+        }
+      }
+      &.done {
+        .title { color: $done; }
+        .squareCheckbox{ background-color: $done; color:$done;
+        label:after{
+          background: $done;
+          background: linear-gradient(to top, $done 0%, darken($done, 10%) 100%);
+          }
+        }
+      }
+      &.reopened {
+        .title { color: $reopened; }
+        .squareCheckbox{ background-color: $reopened; color:$reopened;
+        label:after{
+          background: $reopened;
+          background: linear-gradient(to top, $reopened 0%, darken($reopened, 10%) 100%);
+          }
+        }
+      }
+      &.closed {
+        .title { color: $closed; }
+        .squareCheckbox{ background-color: $closed; color:$closed;
+        label:after{
+          background: $closed;
+          background: linear-gradient(to top, $closed 0%, darken($closed, 10%) 100%);
+          }
+        }
+      }
+      .title{
+        padding-left:5px;
+        text-decoration: line-through;
+      }
+      &.active .title {
+        text-decoration: inherit;
+      }
+    }
   }
 }
 .tasks { text-align: center;
@@ -66,7 +81,7 @@ input, textarea {background: transparent;}
   .done { color: $done; }
   .reopened { color: $reopened; }
   .closed { color: $closed; }
-  .add-task-btn{ width:55%; margin: 20px auto;}
+  .add-task-btn{ width:1000px; margin: 20px auto;}
   .task {position: relative;   display: -webkit-flex;   display: flex;   flex-direction: row;   width:1000px; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor; -webkit-flex-direction: row; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-around; justify-content: space-around;   .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
       &.new { background-color: $new; }
       &.in-progress { background-color: $inProgress; }
@@ -91,7 +106,12 @@ input, textarea {background: transparent;}
         }
       }
       .create{ position: absolute; bottom:0px; left:0px; width:100%; height:36px; padding: 2px 90px 0px 0px;
-        .add-comment-btn{position: absolute; top:2px; right:0;  width:90px; }
+        .add-comment-btn{position: absolute; top:2px; right:0;  width:90px;
+          button{ border-radius: 0px 4px 4px 0px; border-left:none; }
+        }
+        .msg input {
+          border-radius: 4px 0px 0px 4px;
+        }
       }
     }
     .recent {float: right; width: 250px;  padding: 5px 5px 30px 5px; text-align: right;      .changed,
