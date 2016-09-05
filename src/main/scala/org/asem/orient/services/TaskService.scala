@@ -57,9 +57,6 @@ object TaskService extends BaseDB {
                 vertexUpdate (vtx, task2map(task))
               
               vtx.save
-              // add edge between user and task
-              
-
               graph.commit()
               notifyByWebSocket("TASKS_UPDATED:CHANGED")
               Left(task)

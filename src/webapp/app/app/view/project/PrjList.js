@@ -10,6 +10,7 @@ Ext.define('PH.view.project.PrjList', {
         'PH.view.project.PrjRecord',
         'PH.view.project.CycleRecord'
     ],
+    controller: 'projectList',
     layout: 'border',
     items: [{
         region: 'center',
@@ -26,7 +27,7 @@ Ext.define('PH.view.project.PrjList', {
     }, {
         region: 'south',
         xtype: 'grid',
-        height: 300,
+        height: 200,
         store: Ext.create('PH.store.PrjCycle'),
         reference: 'cycleGrid',
         columns: [{
@@ -41,6 +42,9 @@ Ext.define('PH.view.project.PrjList', {
         tbar: [{
             xtype: 'button',
             text: PH.utils.CommonUtils.getLocaleString('button', 'add')
-        }]
+        }],
+        listeners: {
+            selectionchange: 'onSelectCycle '
+        }
     }]
 });
