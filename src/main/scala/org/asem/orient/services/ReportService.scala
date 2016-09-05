@@ -5,28 +5,32 @@ import org.asem.orient.model.entities.{JacksonJsonSupport, _}
 import spray.http._
 import MediaTypes._
 
-/**
-  * Service object define report service functions
-  */
-object ReportService extends BaseDB {
-  /**
-    * Function retrieves all reports for given cycleid and user login. Reports retrivied by several steps
-    * <ul>
-    *   <li>find cycle vertex by id in orientdb</li>
-    *   <li>find user id from orientdb by login</li>
-    *   <li>find all reports by calling PrjService.findReportsForUser
-    * </ul>
-    * @see PrjService
-    * @param cycleId cycle identifier
-    * @param login user login
-    * @return list of erports
-    */
-    def findReportsForUser(cycleId:String, login:String):List[Report] = {
-      Database.getTx( tx => {
-        val PrjCycle(cycle) = tx.getVertex("#" + cycleId)
-        val PrjUser(user) = findVertexByAttr(tx, "PhUser", "login", login).getOrElse(null)
-        PrjService.findReportsForUser(cycle, user).apply(tx)
-      })
+object ReportService {
+  def findReportsForUser (cycleId:String, login:String):List[Report] = {
+    if (cycleId.isEmpty) {
+      List()
+    }
+    else
+      Database.getTx {
+        tx => val user = PhUserService.findUserByLogin (login) match {
+          case Some(vtx) => val PrjUser(usr) = vtx; usr
+          case _ => throw new IllegalArgumentException(s"User {login} not found")
+        }
+
+        val cycle = PrjService.findPrjCycleById (cycleId)(tx)
+        PrjService. findReportsForUser(cycleId, login)(tx)
+      }
+  }
+
+  def addReport (login:String, rep:Report):Report = {
+    Database.getTx {
+      tx => val user = PhUserService.findUserByLogin (login) match {
+        case Some(vtx) => val PrjUser(usr) = vtx; usr
+        case _ => throw new IllegalArgumentException(s"User {login} not found")
+      }
+ 
+      PrjService.addReport (rep.copy(owner = user))(tx)
+    }
   }
 }
 
@@ -37,25 +41,22 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
   private val listReportsRouter = get {
     auth {
       user => path("report") {
-        parameters('cycle) {
-          cycle => respondWithMediaType(`application/json`) (complete (ReportService.findReportsForUser(cycle, user.login)))
+        parameters('cycleId) {
+          cycleId => respondWithMediaType(`application/json`) (complete (ReportService.findReportsForUser(cycleId, user.login)))
         }
       }
     }
   }
 
-//  private val addReportsRouter = post {
-//    auth {
-//      user => path("report") {
-//        entity(as[Report]) {
-//          report => ReportService.createReport(user.login, report) match {
-//            case Left(rep) => respondWithStatus(StatusCodes.Created)(complete(rep))
-//            case Right(s) => respondWithStatus(StatusCodes.Conflict) {complete(s)}
-//          }
-//        }
-//      }
-//    }
-//  }
+  private val addReportsRouter = post {
+    auth {
+      user => path("report") {
+        entity(as[Report]) {
+          report => respondWithMediaType(`application/json`) (complete (ReportService.addReport(user.login, report)))
+        }
+      }
+    }
+  }
 //
 //  private val deleteReportRouter = delete {
 //    auth {
@@ -89,5 +90,5 @@ trait ReportService extends BaseHttpService with JacksonJsonSupport {
 //    }
 //  }
 
-  lazy val reportRoute = listReportsRouter //~ addReportsRouter ~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
+  lazy val reportRoute = {}//listReportsRouter ~ addReportsRouter //~ deleteReportRouter ~ getReportRouter ~ updateReportRouter
 }

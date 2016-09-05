@@ -1,8 +1,9 @@
 Ext.define('PH.store.Reports', {
     extend: 'Ext.data.Store',
     model: 'PH.model.Report',
-    autoLoad: true,
+    autoLoad: false,
     alias: 'store.reports',
+    cycleId: null,
 
     proxy: {
         type: 'rest',
@@ -14,6 +15,9 @@ Ext.define('PH.store.Reports', {
         },
         reader: {
             type: 'json'
+        },
+        extraParams: {
+            cycleId: '0:0'
         }
     }
 });

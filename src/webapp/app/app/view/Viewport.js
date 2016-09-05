@@ -9,6 +9,7 @@ Ext.define('PH.view.Viewport', {
         'PH.view.user.List',
         'Ext.tree.*',
         'PH.view.report.List',
+        'PH.view.project.PrjList'
     ],
     layout: 'border',
     items: [{

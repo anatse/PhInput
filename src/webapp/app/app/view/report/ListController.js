@@ -20,6 +20,21 @@ Ext.define("PH.view.report.ListController", {
             click: 'sync'
         }
     },
+    selectProject: function (combo) {
+        var store = this.lookupReference('prjCycle').getStore();
+        Ext.apply(store.getProxy().extraParams, {
+            prjId : combo.getSelectedRecord().get('id'),
+        });
+        store.load();
+    },
+    selectPrjCycle: function (combo) {
+        // this.getView().getStore().load();
+        var store = this.getView().getStore();
+        Ext.apply(store.getProxy().extraParams, {
+            cycleId : combo.getSelectedRecord().get('id'),
+        });
+        store.load();
+    },
     editReport: function(grid, record) {
         PH.utils.CommonUtils.showEditDialog ('editReport', record, function(win) {
             var values = win.down('form').getValues();

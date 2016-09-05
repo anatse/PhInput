@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import spray.http.{ContentTypes, HttpCharsets, HttpEntity, MediaTypes}
+import spray.http._
 import spray.httpx.marshalling.Marshaller
 import spray.httpx.unmarshalling._
 
@@ -12,9 +12,12 @@ import spray.httpx.unmarshalling._
   * Created by gosha-user on 27.08.2016.
   */
 trait JacksonJsonSupport {
+  import com.fasterxml.jackson.annotation.JsonInclude._
   protected val jacksonModules = Seq(DefaultScalaModule)
 
   protected val mapper = new ObjectMapper() with ScalaObjectMapper
+  
+  mapper.setSerializationInclusion(Include.NON_EMPTY)
   mapper.registerModules(jacksonModules:_*)
   mapper.registerModule(new JodaModule());
 

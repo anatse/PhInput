@@ -125,7 +125,7 @@ Ext.define ('PH.utils.CommonUtils', {
 
     createColumnFromModel: function (res, model, defaultWidth, maxCols, wordWrap) {
         if (!defaultWidth)
-            defaultWidth = 150;
+            defaultWidth = 200;
 
         var columns = [];
         if (model.model)
@@ -135,23 +135,25 @@ Ext.define ('PH.utils.CommonUtils', {
             if (maxCols && columns.length === maxCols)
                 return true;
 
-            var column = {
-                text: res.fields[field.name] ? res.fields[field.name] : field.name,
-                width: defaultWidth,
-                dataIndex: field.name,
-                stateId: field.name
-            };
-
-            if (field.type.type === 'date') {
-                column.renderer = Ext.util.Format.dateRenderer('d.m.Y');
-            }
-            else if (wordWrap) {
-                column.renderer = function (val) {
-                    return '<div style="white-space:normal !important;">'+ val +'</div>';
+            if (field.name != 'id') {
+                var column = {
+                    text: res.fields[field.name] ? res.fields[field.name] : field.name,
+                    width: defaultWidth,
+                    dataIndex: field.name,
+                    stateId: field.name
                 };
-            }
 
-            columns.push (column);
+                if (field.type === 'date') {
+                    column.renderer = Ext.util.Format.dateRenderer('d.m.Y H:i');
+                }
+                else if (wordWrap) {
+                    column.renderer = function (val) {
+                        return '<div style="white-space:normal !important;">' + val + '</div>';
+                    };
+                }
+
+                columns.push(column);
+            }
         });
 
         return columns;

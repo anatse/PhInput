@@ -13,9 +13,16 @@ Ext.define('PH.locale.ru', {
         navi: 'Функции системы',
         users: 'Пользователи системы',
         userEdit: 'Редактирование пользователя',
-        reports: 'Отчеты'
+        reports: 'Отчеты',
+        projects: 'Проекты'
+    },
+    select: {
+        project: 'Выбор проекта',
+        cycle: 'Выбор цикла'
     },
     fields: {
+        name: 'Название',
+        startDate: 'Дата старта',
         login: 'Пользователь',
         firstName: 'Имя',
         secondName: 'Фамилия',

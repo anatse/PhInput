@@ -12,6 +12,7 @@ import spray.routing._
  * @see http://spray.io/documentation/1.2.2/spray-routing/predefined-directives-by-trait/
  * @see http://spray.io/documentation/1.2.2/spray-routing/scheme-directives/scheme/
  * @see http://spray.io/msug
+ * @see https://github.com/dcaoyuan/spray-websocket
  */
 final case class Push(msg: String)
 
@@ -21,6 +22,7 @@ class MainServiceActor(val serverConnection: ActorRef) extends HttpServiceActor
   with LoginService
   with ReportService
   with TaskService
+  with ProjectService
   with StaticResourceService {
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -73,8 +75,9 @@ class MainServiceActor(val serverConnection: ActorRef) extends HttpServiceActor
     loginRoute
       ~ resourceRoute
       ~ userManagementRoute
-      ~ reportRoute
+//      ~ reportRoute
       ~ taskRoute
+      ~ projectRouter
   )
 }
 
