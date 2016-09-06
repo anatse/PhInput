@@ -24,7 +24,7 @@ class Comment extends Component {
                 <span className='time'>{this.dateFormatter(date)}</span>
                 &nbsp;-&nbsp;
                 <span className='author'>{owner}</span>
-                &nbsp;:&nbsp;
+                &nbsp;:&nbsp;<br/>
                 <span className="text"> {comment}</span>
             </div>
         )

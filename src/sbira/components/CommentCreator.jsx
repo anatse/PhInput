@@ -15,7 +15,6 @@ class CommentCreator extends Component {
         if (!this.state.comment) return;
         const {taskId} = this.props;
         const comment = {
-            owner: 'user',
             comment: this.state.comment,
             createDate: Date.now()
         }

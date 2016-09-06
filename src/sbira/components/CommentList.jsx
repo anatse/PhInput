@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react'
-import Comment from './Comment'
-import CommentCreator from './CommentCreator'
+import CommentCont from '../containers/CommentCont'
+import CommentCreatorCont from '../containers/CommentCreatorCont'
 
 class CommentList extends Component {
 
@@ -14,10 +14,10 @@ class CommentList extends Component {
             <div className='cont'>
                 <div className='cont-ins'>
                     {comments.map((comment, index) => {
-                        return <Comment key={index} {...comment}/>
+                        return <CommentCont key={index} {...comment}/>
                     })}
                 </div>
-                <CommentCreator taskId={taskId} onAddComment={onAddComment}/>
+                <CommentCreatorCont taskId={taskId} onAddComment={onAddComment}/>
             </div>
         )
     }
