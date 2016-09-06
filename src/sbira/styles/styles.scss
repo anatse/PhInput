@@ -7,6 +7,7 @@ $done:green;
 $reopened:#ff8100;
 $closed:grey;
 body  {font-family: sans-serif;}
+.rc-calendar-picker{ z-index: 1100;}
 input, textarea {background: transparent;}
 .status-info {position: fixed; top: 15px;left:15px; }
 // .loading-msg { width: 100%; text-align: center; }

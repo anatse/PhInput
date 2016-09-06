@@ -209,7 +209,7 @@ export const postNewTask = (task) => {
 
     dispatch(saveNewTask())
     const taskToSave = Object.assign({},{
-        "deadLine": task.deadLine || new Date(),
+        "deadLine": task.deadLine,
         "name": task.name,
         "content": task.content,
         "owner": task.owner,
