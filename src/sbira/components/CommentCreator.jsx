@@ -48,7 +48,6 @@ class CommentCreator extends Component {
 
 CommentCreator.propTypes = {
     taskId: PropTypes.string.isRequired
-
 }
 
 export default CommentCreator

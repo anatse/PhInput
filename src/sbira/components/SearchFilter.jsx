@@ -12,7 +12,7 @@ class SearchFilter extends Component {
     }
 
     render() {
-        return <FormControl className='search' type="text" placeholder="Поиск..." value={this.props.val} onChange={this.onChange} autoComplete='off'/>
+        return <FormControl className='search' type="text" placeholder="Поиск по имени, описанию и статусу..." value={this.props.val} onChange={this.onChange} autoComplete='off'/>
     }
 
 }

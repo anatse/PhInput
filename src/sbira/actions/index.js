@@ -29,6 +29,31 @@ export const clearSearchFilter = () => {
 }
 
 /******************************** GETTING USERS ********************************/
+export const currentUserOk = (user) => {
+  return {
+    type: 'CURRENT_USER_OK',
+    receivedAt: new Date(),
+    user
+  }
+}
+
+export const getCurrentUser = () => {
+
+  return function (dispatch) {
+    let axiosPromise = axios.get('/project/curuser', {params:{antiCache:Date.now()}});
+    axiosPromise.then(response => {
+        // console.log(response);
+        dispatch(currentUserOk(response.data))
+      })
+      .catch( error => {
+        console.log(error);
+        alert("Не удалось определить пользователя.")
+        // dispatch(currentUserErr(error))
+      });
+    return axiosPromise;
+  }
+}
+
 export const receiveUsersOk = (users) => {
   return {
     type: 'RECEIVE_USERS_OK',

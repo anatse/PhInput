@@ -6,7 +6,7 @@ const mapStateToProps = (state, ownProps) => {
   const options = state.users.map(user => {
     return {
       value: user.login,
-      label: user.firstName,
+      label: user.displayName,
     }
   })
   return {

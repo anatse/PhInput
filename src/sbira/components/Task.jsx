@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react'
 import statuses, {getStatusByName} from '../utils/taskStatuses'
 import CommentList from './CommentList'
+import AuthorCont from '../containers/AuthorCont'
 import {
     ButtonToolbar,
     ButtonGroup,
@@ -86,11 +87,7 @@ class Task extends React.Component {
                             </div>
                         </ListGroupItem>
                         <ListGroupItem>
-                            <div className='owner'>
-                                Автор:
-                                <span>
-                                    {task.owner}</span>
-                            </div>
+                            <AuthorCont authorLogin={task.owner} />
                         </ListGroupItem>
                         <ListGroupItem>
                             <div className='assigned'>

@@ -7,10 +7,10 @@ import {initWebSocket, addOnMessage} from './websocket'
 import configureStore from './store/configureStore'
 import {fetchTasks} from './actions'
 
-// import reactBootstrapCss from './styles/bootstrap.min.css';
+import reactBootstrapCss from './styles/bootstrap.css';
 import stylesCss from './styles/styles.scss';
 
-window.addEventListener("load", initWebSocket, false);
+// window.addEventListener("load", initWebSocket, false);
 
 let store = configureStore()
 
@@ -24,16 +24,16 @@ render(
 module.hot.accept();
 
 // move this... somewhere
-addOnMessage((evt)=>{
-  console.log("onMsg:", evt.data);
-  let msg = "Получено событие об изменении данных. Обновимся ?";
-  switch (evt.data) {
-      case 'TASKS_UPDATED:DELETED':
-      case 'TASKS_UPDATED:COMMENT_ADDED':
-      case 'TASKS_UPDATED:CHANGED':
-      case 'TASKS_UPDATED:ADDED':
-          // if (confirm(msg)) fetchTasks();
-      default:
-
-  }
-})
+// addOnMessage((evt)=>{
+//   console.log("onMsg:", evt.data);
+//   let msg = "Получено событие об изменении данных. Обновимся ?";
+//   switch (evt.data) {
+//       case 'TASKS_UPDATED:DELETED':
+//       case 'TASKS_UPDATED:COMMENT_ADDED':
+//       case 'TASKS_UPDATED:CHANGED':
+//       case 'TASKS_UPDATED:ADDED':
+//           // if (confirm(msg)) fetchTasks();
+//       default:
+//
+//   }
+// })

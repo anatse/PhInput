@@ -11,9 +11,10 @@ class TaskList extends Component {
     }
 
     componentWillMount() {
-        const {fetchTasks, getUsersList} = this.props;
+        const {fetchTasks, getUsersList, getCurrentUser} = this.props;
         // FIXME: have to init user list first, so we can render selects in task.
         getUsersList().then(fetchTasks());
+        getCurrentUser();
     }
 
     render() {
