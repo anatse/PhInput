@@ -3,7 +3,7 @@ var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
 
 var host = 'localhost'; // if you change here - also edit webpack config
-var backendTarget = 'https://localhost:8080/';
+var backendTarget = 'http://localhost:8080/';
 
 new WebpackDevServer(webpack(config), {
     publicPath: config.output.publicPath,

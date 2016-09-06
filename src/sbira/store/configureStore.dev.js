@@ -6,8 +6,9 @@ import rootReducer from '../reducers'
 export default function configureStore(preloadedState) {
 
   const loggerMiddleware = createLogger()
- 
-  const store = createStore(
+
+  const store = (window.devToolsExtension)?
+  createStore(
     rootReducer,
     preloadedState,
     compose(
@@ -16,7 +17,17 @@ export default function configureStore(preloadedState) {
         loggerMiddleware // neat middleware that logs actions
       ),
       // lets us use React Chrome dev tools plugin
-      window.devToolsExtension && window.devToolsExtension()
+      window.devToolsExtension()
+    )
+  ) :
+  createStore(
+    rootReducer,
+    preloadedState,
+    compose(
+      applyMiddleware(
+        thunkMiddleware, // lets us dispatch() functions
+        loggerMiddleware // neat middleware that logs actions
+      )
     )
   )
 

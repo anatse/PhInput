@@ -43,11 +43,18 @@ export const getCurrentUser = () => {
     let axiosPromise = axios.get('/project/curuser', {params:{antiCache:Date.now()}});
     axiosPromise.then(response => {
         // console.log(response);
+        if (response.data && response.data.indexOf && response.data.indexOf('DOCTYPE html')>=0) {
+          // redirect to login
+          debugger
+          window.location.href = '/pub/login.html';
+        }
         dispatch(currentUserOk(response.data))
       })
       .catch( error => {
         console.log(error);
-        alert("Не удалось определить пользователя.")
+        const goLogin = confirm("Не удалось определить пользователя. Перейти на экран входа?");
+         // failed to get user. Ask for redirect to login:
+        if (goLogin) window.location.href = '/pub/login.html'
         // dispatch(currentUserErr(error))
       });
     return axiosPromise;

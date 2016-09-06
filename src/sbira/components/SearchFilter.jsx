@@ -14,8 +14,8 @@ class SearchFilter extends Component {
         e.preventDefault();
         this.state.timerId && clearTimeout(this.state.timerId)
         const filterValue = e.target.value
-        setTimeout(() => {this.props.onChange(filterValue)}, this.props.searchDelay)
-        this.setState({val:filterValue})
+        const timerId = setTimeout(() => {this.props.onChange(filterValue)}, this.props.searchDelay)
+        this.setState({val:filterValue,timerId})
     }
 
     render() {
