@@ -19,6 +19,7 @@ class StatusInformer extends Component {
         } else {
             return (
                 <div className="status-info">
+                    <a className='logout' href="/logout">Выход</a><br/>
                     Обновлено в {moment(lastUpdate).format('HH:mm:ss')}
                 </div>
             )

@@ -47,7 +47,7 @@ class AddTask extends Component {
             : true;
         return (
             <div>
-                <SearchFilterCont />
+                <SearchFilterCont searchDelay={250} />
                 <div className='add-task-btn'>
                     <Button bsSize="large" block onClick={this.open}>Добавить задачу</Button>
                 </div>

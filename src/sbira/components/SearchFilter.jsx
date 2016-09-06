@@ -4,22 +4,30 @@ class SearchFilter extends Component {
 
     constructor(props) {
         super(props)
+        this.state={
+          timerId: null,
+          val: ''
+        }
     }
 
     onChange = (e) => {
         e.preventDefault();
-        this.props.onChange(e.target.value)
+        this.state.timerId && clearTimeout(this.state.timerId)
+        const filterValue = e.target.value
+        setTimeout(() => {this.props.onChange(filterValue)}, this.props.searchDelay)
+        this.setState({val:filterValue})
     }
 
     render() {
-        return <FormControl className='search' type="text" placeholder="Поиск по имени, описанию и статусу..." value={this.props.val} onChange={this.onChange} autoComplete='off'/>
+        return <FormControl className='search' type="text" placeholder="Поиск по имени, описанию и статусу..." value={this.state.val} onChange={this.onChange} autoComplete='off'/>
     }
 
 }
 
 SearchFilter.propTypes = {
     onChange: PropTypes.func.isRequired,
-    val: PropTypes.string.isRequired
+    val: PropTypes.string.isRequired,
+    searchDelay: PropTypes.number.isRequired,
 }
 
 export default SearchFilter

@@ -34,6 +34,10 @@ new WebpackDevServer(webpack(config), {
         '/user/*': {
             target: backendTarget,
             secure:false
+        },
+        '/logout/*': {
+            target: backendTarget,
+            secure:false
         }
     }
 }).listen(80, host, function(err, result) {

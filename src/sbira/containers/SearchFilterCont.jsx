@@ -4,7 +4,8 @@ import SearchFilter from '../components/SearchFilter'
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    val: state.searchFilter
+    val: state.searchFilter,
+    searchDelay: ownProps.searchDelay
   }
 }
 
