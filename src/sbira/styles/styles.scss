@@ -81,8 +81,9 @@ input, textarea {background: transparent;}
   .done { color: $done; }
   .reopened { color: $reopened; }
   .closed { color: $closed; }
-  .add-task-btn{ width:1000px; margin: 20px auto;}
-  .task {position: relative;   display: -webkit-flex;   display: flex;   flex-direction: row;   width:1000px; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor; -webkit-flex-direction: row; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-around; justify-content: space-around;   .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
+  .add-task-btn, .search{ width:1000px; margin: 20px auto;}
+  .task {position: relative;   display: -webkit-flex;   display: flex;   flex-direction: row;   width:1000px; height: 300px; margin: 40px auto 10px; padding-left: 50px; border: 1px dashed $borderColor; background: $bgcolor; -webkit-flex-direction: row; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-around; justify-content: space-around;
+   .status { position: absolute; top: 0; left: 0; width: 35px; height: 100%; transition: background-color 0.3s ease;
       &.new { background-color: $new; }
       &.in-progress { background-color: $inProgress; }
       &.done { background-color: $done; }

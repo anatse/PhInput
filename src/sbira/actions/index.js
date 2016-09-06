@@ -15,6 +15,18 @@ export const clearVisibilityFilter = () => {
   }
 }
 
+export const setSearchFilter = (filter) => {
+  return {
+    type: 'SET_SEARCH_FILTER',
+    filter
+  }
+}
+
+export const clearSearchFilter = () => {
+  return {
+    type: 'CLEAR_SEARCH_FILTER',
+  }
+}
 
 /******************************** GETTING USERS ********************************/
 export const receiveUsersOk = (users) => {

@@ -1,6 +1,6 @@
 import React, {Component, PropTypes} from 'react'
 import {Modal, Button, FormGroup, ControlLabel, FormControl} from 'react-bootstrap'
-
+import SearchFilterCont from '../containers/SearchFilterCont'
 const newName = '';
 const newContent = '';
 
@@ -47,6 +47,7 @@ class AddTask extends Component {
             : true;
         return (
             <div>
+                <SearchFilterCont />
                 <div className='add-task-btn'>
                     <Button bsSize="large" block onClick={this.open}>Добавить задачу</Button>
                 </div>

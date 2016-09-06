@@ -2,18 +2,11 @@ import { connect } from 'react-redux'
 // import { toggleTodo } from '../actions'
 import TaskList from '../components/TaskList'
 import { fetchTasks, getUsersList, editTask, postEditedTask, postNewTask, initDeleteTask, saveComment} from '../actions'
-
-const filterTasks = (tasks, filters) => {
-  return tasks.filter(t => {
-    return filters.some( f =>{
-      return t.status == f.name
-    })
-  })
-}
+import filterTasks from '../utils/utils'
 
 const mapStateToProps = (state) => {
   return {
-    tasks: filterTasks(state.tasks.tasks, state.visibilityFilter),
+    tasks: filterTasks(state.tasks.tasks, state.visibilityFilter, state.searchFilter),
     isLoading: state.tasks.status.isLoading,
     lastUpdate: state.tasks.status.lastUpdate
   }

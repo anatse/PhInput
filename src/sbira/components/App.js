@@ -2,6 +2,7 @@ import React from 'react'
 import VisibleTaskList from '../containers/VisibleTaskList';
 import FilterList from '../components/FilterList';
 import StatusInformerCont from '../containers/StatusInformerCont'
+import SearchFilterCont from '../containers/SearchFilterCont'
 
 const App = () => (
   <div>
