@@ -138,11 +138,11 @@ const refreshTasks = (dispatch) => {
 }
 
 /*************************** EDITING TASKS ***************************/
-export const editTask = (id, editedTask) => {
+export const editTask = (id, editedPart) => {
   return {
     type: 'EDIT_TASK',
     id,
-    editedTask
+    editedPart
   }
 }
 export const saveEditedTask = () => {
@@ -164,11 +164,13 @@ export const saveEditedTaskErr = (error) => {
 }
 
 export const postEditedTask = (task) => {
-  return function(dispatch){
+  return function(dispatch, getState){
+    // console.log("getState", getState().tasks.tasks)
 
     dispatch(saveEditedTask())
     // update task changeDate:
     task.changeDate = Date.now();
+    delete task.dirty;
 
     return axios.put('/task/' + task.id , task)
       .then(function (response) {

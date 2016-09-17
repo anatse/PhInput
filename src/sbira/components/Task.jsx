@@ -25,7 +25,8 @@ class Task extends React.Component {
         task: PropTypes.object.isRequired,
         onChangeContent: PropTypes.func.isRequired,
         onSaveTask: PropTypes.func.isRequired,
-        onDelTask: PropTypes.func.isRequired
+        onDelTask: PropTypes.func.isRequired,
+        isLoading: PropTypes.bool.isRequired,
     }
 
     onSetNextStatus = (status) => {
@@ -49,7 +50,8 @@ class Task extends React.Component {
             onDelTask,
             onSetNextStatus,
             possibleStatuses,
-            onAddComment
+            onAddComment,
+            isLoading
         } = this.props;
         const status = getStatusByName(task.status);
         const statusClass = status.className;
@@ -92,7 +94,7 @@ class Task extends React.Component {
                         <ListGroupItem>
                             <div className='assigned'>
                                 <div className='assigned-label'>Ответственный:</div>
-                                <UserSelectCont value={task.assignedPerson} taskId={task.id}/>
+                                <UserSelectCont value={task.assignedPerson} task={task}/>
                             </div>
                         </ListGroupItem>
                     </ListGroup>
@@ -103,7 +105,7 @@ class Task extends React.Component {
                                     <ButtonGroup bsSize="small">
                                         {possibleStatuses.map(function(possibleStatus, index) {
                                             return (
-                                                <Button key={index} className={possibleStatus.className} onClick={() => {
+                                                <Button key={index} className={possibleStatus.className} disabled={isLoading} onClick={() => {
                                                     onSetNextStatus(possibleStatus)
                                                 }}>{possibleStatus.btnText}</Button>
                                             )

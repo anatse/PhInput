@@ -27,9 +27,9 @@ const VisibleTaskList = connect(
     fetchTasks,
     getUsersList,
     getCurrentUser,
-    onChange: (id, editedTask) => {
+    onChange: (id, editedPart) => {
       return function(dispatch){
-          dispatch(editTask(id, editedTask))
+          dispatch(editTask(id, editedPart))
       }
     },
     onSaveTask: (taskToSave) => {

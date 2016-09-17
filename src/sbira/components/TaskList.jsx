@@ -18,19 +18,19 @@ class TaskList extends Component {
     }
 
     render() {
-        const {tasks, onChange, onSaveTask, onAddTask, onDelTask, onAddComment} = this.props;
+        const {tasks, onChange, onSaveTask, onAddTask, onDelTask, onAddComment, isLoading} = this.props;
         return (
           <div>
             <div className='tasks'>
                 <AddTask onAddTask={onAddTask} />
                 {tasks.map(task => <Task
                   key={task.id} task={task}
+                  isLoading={isLoading}
                   onAddComment={onAddComment}
                   onChangeContent={(event) => {
                     const newValue = event.target.value;
-                    onChange(task.id, {content: newValue});
+                    onChange(task.id, {content: newValue, dirty: true});
                   }}
-
                   onSaveTask={() => {
                     onSaveTask(task);
                   }}
@@ -38,7 +38,8 @@ class TaskList extends Component {
                     onDelTask(task.id);
                   }}
                   onSetNextStatus={(status)=>{
-                    onChange(task.id, {status: status.name});
+                    const taskToSave = {...task, status: status.name}
+                    onSaveTask(taskToSave);
                   }}
                   possibleStatuses={getNext(task.status)}
                   />

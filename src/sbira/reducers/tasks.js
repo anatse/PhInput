@@ -3,7 +3,7 @@ import statuses from '../utils/taskStatuses'
 const task = (state, action) => {
     switch (action.type) {
         case 'EDIT_TASK':
-            return Object.assign( {}, state, action.editedTask );
+            return Object.assign( {}, state, action.editedPart );
         default:
             return state
     }

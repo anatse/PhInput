@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import UserSelect from '../components/UserSelect'
-import {editTask} from '../actions'
+import {postEditedTask} from '../actions'
 
 const mapStateToProps = (state, ownProps) => {
   const options = state.users.map(user => {
@@ -18,7 +18,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: function(selectedOption)  {
-      dispatch(editTask(ownProps.taskId, {assignedPerson: selectedOption.value}))
+      const taskToSave = {...ownProps.task, assignedPerson: selectedOption.value}
+      dispatch(postEditedTask(taskToSave));
     }
   }
 }
