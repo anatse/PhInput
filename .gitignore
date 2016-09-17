@@ -3,8 +3,8 @@ target
 node_modules
 .iml
 *.iml
-src/webapp/login
-src/weball/sbira
+src/webapp/login/*
+src/webapp/sbira/*
 phinp-mv-1.0-SNAPSHOT.jar
 lib
 KeyStore.jks
