@@ -67,6 +67,7 @@ class Task extends React.Component {
                     <FormGroup >
                         <ControlLabel>Описание</ControlLabel>
                         <FormControl componentClass="textarea" placeholder="Введите описание задачи..." value={task.content} onChange={onChangeContent}/>
+                        <Button onClick={onSaveTask} bsStyle="success" disabled={!task.dirty}>Сохранить</Button>
                     </FormGroup>
                 </div>
                 <div className='comments block'>
@@ -118,8 +119,7 @@ class Task extends React.Component {
                     <div className='btn-cont'>
                         <ButtonToolbar>
                             <ButtonGroup>
-                                <Button key={1} onClick={onDelTask} bsStyle="danger">Удалить</Button>
-                                <Button key={2} onClick={onSaveTask} bsStyle="success">Сохранить</Button>
+                                <Button onClick={onDelTask} bsStyle="danger">Удалить</Button>
                             </ButtonGroup>
                         </ButtonToolbar>
                     </div>
