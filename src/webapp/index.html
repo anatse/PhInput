@@ -1,64 +1,125 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<head>
+</head>
+<body>
+<script src="jquery.min.js"></script>
+<script src="js-cookie.js"></script>
 
-    <title id="page-title">Account Manager</title>
+<h1>akka-http-session example</h1>
 
-    <script type="text/javascript" src="js/ext-all.js"></script>
-    <!--    <script type="text/javascript" src="js/classic/theme-crisp/theme-crisp-debug.js"></script>
-        <link rel="stylesheet" type="text/css" href="js/classic/theme-crisp/resources/theme-crisp-all.css" />-->
+<p>
+    Logged in as: <span id="current_login"></span>
+</p>
+<p>
+    Get login request status: <span id="current_login_status_code"></span>
+</p>
 
-    <!--    <script type="text/javascript" src="js/classic/theme-neptune/theme-neptune.js"></script>
-        <link rel="stylesheet" type="text/css" href="js/classic/theme-neptune/resources/theme-neptune-all.css" />-->
+<form id="login_form">
+    <p>
+        Login: <input type="text" name="login" id="login" />
+    </p>
+    <p>
+        Password: <input type="password" name="password" id="password" />
+    </p>
+    <input type="submit" value="Login" id="do_login" />
+    <input type="submit" value="Register" id="do_register" />
+</form>
 
-    <script type="text/javascript" src="js/classic/theme-crisp-touch/theme-crisp-touch.js"></script>
-    <link rel="stylesheet" type="text/css" href="js/classic/theme-crisp-touch/resources/theme-crisp-touch-all.css" />
+<form id="logout_form">
+    <input type="submit" value="Logout" id="do_logout" />
+</form>
 
-    <script type="text/javascript" src="list-view.js"></script>
-    <link rel="stylesheet" type="text/css" href="list-view.css" />
-  </head>
-  <body>
-    <script>
-        var socket = new WebSocket("ws://javascript.ru/ws");
+<script>
+    var $loginForm = $('#login_form');
+    var $logoutForm = $('#logout_form');
+    var $currentLogin = $('#current_login');
+    var $currentLoginStatus = $('#current_login_status_code');
+    $loginForm.hide();
+    $logoutForm.hide();
 
-        console.log (socket);
+    function handleResponse(data, status) {
+        if (status == 'success') {
+            $loginForm.hide();
+            $logoutForm.show();
 
-socket.onopen = function() {
-  alert("Соединение установлено.");
-};
+            $currentLogin.text(data);
+            $currentLoginStatus.text(status);
+        } else {
+            $loginForm.show();
+            $logoutForm.hide();
 
-socket.onclose = function(event) {
-  if (event.wasClean) {
-    alert('Соединение закрыто чисто');
-  } else {
-    alert('Обрыв соединения'); // например, "убит" процесс сервера
-  }
-  alert('Код: ' + event.code + ' причина: ' + event.reason);
-};
+            $currentLogin.text('');
+            $currentLoginStatus.text(status + ' (' + data.status + ')');
+        }
+    }
 
-socket.onmessage = function(event) {
-  alert("Получены данные " + event.data);
-};
+    function getCurrentLogin() {
+        $.ajax(addCsrfHeader({
+            url: '/api/current_login',
+            type: 'GET',
+            success: handleResponse,
+            error: handleResponse
+        }));
+    }
 
-socket.onerror = function(error) {
-  alert("Ошибка " + error.message);
-};
+    getCurrentLogin();
 
-socket.send("Привет");
-    </script>
+    $('#do_login').click(function(e) {
+        $.ajax(addCsrfHeader({
+            url: '/api/do_login',
+            type: 'POST',
+	    data: JSON.stringify({
+		login: $('#login').val(),
+		pass: $('#password').val()
+	    }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: getCurrentLogin
+        }));
+        e.preventDefault();
+        return false;
+    });
 
-    <h1>ListView Example</h1>
+    $('#do_register').click(function(e) {
+        $.ajax(addCsrfHeader({
+            url: '/api/do_register',
+            type: 'POST',
+	    data: JSON.stringify({
+		login: $('#login').val(),
+		password: $('#password').val(),
+                email: 'user@demo.com'
+	    }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: getCurrentLogin
+        }));
+        e.preventDefault();
+        return false;
+    });
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      Select image to upload:
-      <input type="file" name="imageupload" id="imageupload">
-      <input type="submit" value="Upload Image" name="submit">
-    </form>
+    $('#do_logout').click(function(e) {
+        $.ajax(addCsrfHeader({
+            url: '/api/do_logout',
+            type: 'POST',
+            success: getCurrentLogin
+        }));
+        e.preventDefault();
+        return false;
+    });
 
-    <p>Ext 4 replaces Ext.ListView with the default Ext.grid.Panel.</p>
-    <p>Note that the js is not minified so it is readable. See <a href="http://docs.sencha.com/extjs/6.0.2-classic/Ext.form.field.Date.html#cfg-altFormats">Extjs docs</a>.</p>
-  </body>
+    function addCsrfHeader(opts) {
+        var token = Cookies.get('XSRF-TOKEN');
+        if (token) {
+            console.log('Setting csrf token: ' + token);
+            opts['headers'] = {
+                'X-XSRF-TOKEN': token
+            }
+        } else {
+            console.log('No csrf token');
+        }
+
+        return opts;
+    }
+</script>
+</body>
 </html>
