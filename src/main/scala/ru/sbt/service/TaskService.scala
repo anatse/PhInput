@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
 sealed trait TaskOperations { 
   def name:String 
   def func(task:Task, userId:String):Any
-  def unapply(value: String): Option[TaskOperations] = if (name == value) Some(ChangeTask) else None
+  def unapply(value: String): Option[TaskOperations] = if (name == value) Some(this) else None
 }
 
 case object AddTask extends TaskOperations { 
