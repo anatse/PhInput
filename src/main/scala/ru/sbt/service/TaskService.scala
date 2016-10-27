@@ -30,6 +30,11 @@ case object ChangeTask extends TaskOperations {
   def func (task:Task, userId:String) = TaskService.changeTask(task, userId)
 }
 
+case object AddComment extends TaskOperations { 
+  val name = "COMMENT"
+  def func (task:Task, userId:String) = for {comment <- task.comments} yield {TaskService.addComment(task.id, comment, comment.owner)}
+}
+
 case class TaskOperation(operation:String, task: Task)
 
 object TaskService extends BaseDB {
@@ -114,7 +119,10 @@ object TaskService extends BaseDB {
         graph.getVertex("#" + taskId) match {
           case vtx: OrientVertex => {
             val comVtx = addVertex("Comment", Map(
-              "owner" -> graph.getVertex("#" + userId).getProperty[String]("login"),
+              "owner" -> (graph.getVertex("#" + userId) match {
+                case userVtx:OrientVertex => userVtx.getProperty[String]("login")
+                case _ => ""
+              }),
               "comment" -> comment.comment,
               "createDate" -> comment.createDate
             )).apply(graph)

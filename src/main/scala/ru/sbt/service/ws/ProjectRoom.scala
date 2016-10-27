@@ -1,6 +1,5 @@
 package ru.sbt.service.ws
 
-import akka.NotUsed
 import akka.actor._
 import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.stream.FlowShape
@@ -15,7 +14,7 @@ class ProjectRoom(roomId: Int, actorSystem: ActorSystem) {
       implicit builder: GraphDSL.Builder[ActorRef] =>
         import GraphDSL.Implicits._
         source =>
-
+      
         // flow used as input, it takes Messages
         val fromWebsocket = builder.add(
           Flow[Message].collect {

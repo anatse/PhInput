@@ -5,6 +5,8 @@ import akka.event.Logging
 import akka.event.LoggingAdapter
 import ru.sbt.orient.model.JacksonJsonSupport
 import ru.sbt.orient.model.entities.Task
+import ru.sbt.orient.model.entities.Comment
+import ru.sbt.service.AddComment
 import ru.sbt.service.AddTask
 import ru.sbt.service.ChangeTask
 import ru.sbt.service.DelTask
@@ -28,6 +30,7 @@ class ProjectRoomActor(roomId: Int) extends Actor with JacksonJsonSupport {
 
     case msg: IncomingMessage =>
       val TaskDTORegex = "\\{(.*)\\}".r
+      println (msg.message)
 
       msg.message match {
         // For object messages 
@@ -52,11 +55,20 @@ class ProjectRoomActor(roomId: Int) extends Actor with JacksonJsonSupport {
                 case Right(s) => broadcast(ChatMessage (msg.sender, "Error changing task: " + s))
               }
 
+            case AddComment(task) => 
+              val t = task.func(taskDTO.task, msg.sender)
+              t match {
+                case x:List[Either[Comment, String]@unchecked] => x.foreach {
+                  case Left(s) => broadcast(ChatMessage (msg.sender, "Comment added: " + s))
+                  case Right(s) => broadcast(ChatMessage (msg.sender, "Error adding comment: " + s))
+                }
+              }
+
             case _ => 
               if (logger.isDebugEnabled)
                 logger.debug(s"Unknow task operation: $taskDTO.operation")
           }
-
+          
         // For simple text messages
         case _ => broadcast(ChatMessage (msg.sender, msg.message))
       }
