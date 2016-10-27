@@ -36,6 +36,7 @@ object Main extends App with Config {
   implicit def myExceptionHandler: ExceptionHandler =
     ExceptionHandler {
       case th: Throwable =>
+        th.printStackTrace
         extractUri { uri =>
           complete(HttpResponse(InternalServerError, entity = th.getMessage))
         }

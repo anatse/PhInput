@@ -27,6 +27,16 @@
         writeToScreen("CONNECTED");
         doSend("Rock rock rock rock");
         doSend("Rock 1");
+	doSend(JSON.stringify ({
+		operation: 'ADD',
+	        task: {
+	         	name: 'New Task',
+			content: 'asdasfasf',
+			comments: [],
+			status: 'NEW',
+			owner: 'user'
+		}
+	}));
     }
     function onClose(evt) {
         console.log (evt);

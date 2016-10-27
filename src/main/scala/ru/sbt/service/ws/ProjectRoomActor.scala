@@ -1,15 +1,18 @@
 package ru.sbt.service.ws
 
 import akka.actor.{Actor, ActorRef}
+import akka.event.Logging
 import akka.event.LoggingAdapter
 import ru.sbt.orient.model.JacksonJsonSupport
+import ru.sbt.orient.model.entities.Task
 import ru.sbt.service.AddTask
 import ru.sbt.service.ChangeTask
 import ru.sbt.service.DelTask
 import ru.sbt.service.TaskOperation
 
-class ProjectRoomActor(roomId: Int)(implicit logger: LoggingAdapter) extends Actor with JacksonJsonSupport {
+class ProjectRoomActor(roomId: Int) extends Actor with JacksonJsonSupport {
   var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
+  val logger: LoggingAdapter = Logging.getLogger(context.system, this)
 
   override def receive: Receive = {
     case UserJoined(name, actorRef) =>
@@ -29,11 +32,25 @@ class ProjectRoomActor(roomId: Int)(implicit logger: LoggingAdapter) extends Act
       msg.message match {
         // For object messages 
         case TaskDTORegex(task) =>
-          val taskDTO:TaskOperation = mapper.readValue (msg.message)
+          val taskDTO:TaskOperation = mapper.readValue[TaskOperation] (msg.message)
           taskDTO.operation match {
-            case AddTask(task) => task.func(taskDTO.task, msg.sender)
-            case DelTask(task) => task.func(taskDTO.task, msg.sender)
-            case ChangeTask(task) => task.func(taskDTO.task, msg.sender)
+            case AddTask(task) => 
+              val t = task.func(taskDTO.task, msg.sender)
+              broadcast(ChatMessage (msg.sender, "New task added: " + t.asInstanceOf[Task].id))
+
+            case DelTask(task) => 
+              val t = task.func(taskDTO.task, msg.sender)
+              t.asInstanceOf[Either[String, String]] match {
+                case Left(s) => broadcast(ChatMessage (msg.sender, "Task deleted successfull"))
+                case Right(s)=> broadcast(ChatMessage (msg.sender, "Error deleting task: " + s))
+              }
+
+            case ChangeTask(task) => 
+              val t = task.func(taskDTO.task, msg.sender)
+              t.asInstanceOf[Either[Task, String]] match {
+                case Left(s) => broadcast(ChatMessage (msg.sender, "Task changed: " + s.name))
+                case Right(s) => broadcast(ChatMessage (msg.sender, "Error changing task: " + s))
+              }
 
             case _ => 
               if (logger.isDebugEnabled)

@@ -53,6 +53,7 @@ object TaskService extends BaseDB {
     Database.getTx(
       tx => {
         val vtx = addVertex("Task", task2map(task)).apply(tx)
+        tx.commit()
         val Task(ret) = vtx
         ret
       }
